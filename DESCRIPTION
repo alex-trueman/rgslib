@@ -1,11 +1,23 @@
 Package: rgslib
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: R Interface to GSLIB Programs
+Version: 0.0.2
+Authors@R: person("Alex", "Trueman", email = "amt4158@gmail.com", role = c("aut", "cre"))
+Description: Provide an interface for running GSLIB functions on data in R.
+    Fortran executables are run by being called from R.
+URL: https://github.com/truemoid/rgslib
+BugReports: https://github.com/truemoid/rgslib
 Depends: R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
+Imports:
+    data.table (>= 1.11),
+    dplyr (>= 0.7),
+    readr (>= 1.1),
+    stats,
+    utils
+Suggests: 
+    spelling
+Language: en-GB
