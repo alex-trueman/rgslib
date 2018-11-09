@@ -1,9 +1,9 @@
 #' Run the CCG \code{varcalc} Program to Calculate Experimental Variograms.
 #'
-#' \code{varcalcR} calculates experimental variograms. THis process is suited to
+#' \code{varcalcR} calculates experimental variograms. This process is suited to
 #' irregulalry spaced data such as samples. If more than one variable is input
-#' all possible semi-variograms and cross-variograms are calculated. Trimming
-#' limits are fixed to -1.0e21 and +1.0e21.
+#' all possible semi-variograms and cross-variograms are calculated. Default
+#' arguments will create omni-directional variograms for each variable.
 #'
 #' @param data Data frame of sample data.
 #' @param vars Character vector, column names in \code{data} for variograms.
@@ -11,27 +11,27 @@
 #'   fields, 2 for 2D and 3 for 3D.
 #' @param vpar list of named vectors containing parameters for each variogram
 #'   direction to be calculated. See function argument default for spec.
-#' @param standardize Scalar integer either 0 or 1. 1: standardize the sill.
-#' @param legacy Scalar integer either 0 or 1. 1: output legacy format.
-#' @param check Scalar integer either 0 or 1. 1: run input checks.
+#' @param variostd Scalar boolean, if \code{TRUE} standardize the sill.
+#' @param variosills Numeric scalar. Sill to standardize to if \code{variostd}
+#'   is \code{TRUE}. Default \code{NULL} means let program decide.
+#' @param legacy Scalar boolean, if \code{TRUE} output legacy format.
+#' @param strict Scalar boolean, if \code{TRUE} run input checks.
 #' @param debug Scalar boolean. If \code{TRUE} don't delete temporary system
 #'   files.
 #'
-#' @return A data frame with calculated variogram data.
+#' @return A data frame with calculated variogram data. Side effect is output
+#'   variogram calculation file from \code{varcalc} program. This file is used
+#'   by other programs such as \code{varmod}.
 #' @export
 #' @examples
 #' test <- unscoreR(samples_2d, c("thk", "accum"))
 #' data <- varcalcR(test$data, vars=c("NS_thk"))
 varcalcR <- function(
-  data, vars, xyz=c("x", "y"), vpar=list(
-    dir1=c(azm=0, azmtol=22.5, bndhorz=1000, dip=0, diptol=22.5, bndvert=1000,
-      tilt=0, nlags=10, dlag=30, lagtol=15),
-    dir2=c(azm=90, azmtol=22.5, bndhorz=1000, dip=0, diptol=22.5, bndvert=1000,
-      tilt=0, nlags=10, dlag=30, lagtol=15),
-    dir3=c(azm=0, azmtol=22.5, bndhorz=1000, dip=90, diptol=22.5, bndvert=1000,
-      tilt=0, nlags=10, dlag=30, lagtol=15)
-    ),
-    standardize=0, legacy=0, check=1, debug=FALSE
+  data, vars, xyz=c("x", "y"),
+  vpar=list(dir1=c(azm=0, azmtol=90,
+    bandhorz=1.0e+21, dip=0, diptol=90, bandvert=1.0e+21, tilt=0, nlags=10,
+    lagdist=30, lagtol=15)),
+  variostd=FALSE, variosills=NULL, legacy=FALSE, strict=TRUE, debug=TRUE
 ) {
 
   # Get column indices.
@@ -60,13 +60,13 @@ varcalcR <- function(
         factorial(nvars - 2))) + nvars
   }
 
-  # Build a parameter string for the `varcalc` executable.
+  # Build a parameter string.
   parstring <- c(
     "START OF PARAMETERS:",
     "varcalc-in.dat ",
     paste0(xyz_i, "  "),
     paste0(nvars, "  ", vars_i, "  "),
-    "-1.0e21  1.0e21  ",
+    "-999  1.0e21  ",
     paste0(length(vpar), "  ")
   )
   # Add variogram calculation parameters for each direction.
@@ -79,9 +79,9 @@ varcalcR <- function(
   parstring <- c(
     parstring,
     "varcalc-out.dat  ",
-    paste0(legacy, "  "),
-    paste0(check, "  "),
-    paste0(standardize, "  "),
+    paste0(as.numeric(legacy), "  "),
+    paste0(as.numeric(strict), "  "),
+    paste0(as.numeric(variostd), "  "),
     paste0(nvarios, "  ")
   )
   # Add variogram type definition for the variograms.
@@ -92,7 +92,7 @@ varcalcR <- function(
   for(v in 1:nvars) {
     parstring <- c(
       parstring,
-      paste0(v, "  ", v, "  1  ")
+      paste0(v, "  ", v, "  1  ", variosills, "  ")
     )
     vars_df <- rbind(vars_df, data.frame(head = v, tail = v,
       head_a = vars[v], tail_a = vars[v]))
@@ -106,7 +106,7 @@ varcalcR <- function(
     for(cv in 1:(nvars - t1start)) {
       parstring <- c(
         parstring,
-        paste0(t1start, "  ", t2, "  2  ")
+        paste0(t1start, "  ", t2, "  2  ", variosills, "  ")
       )
       t2 <- t2 + 1
       nruns <- nruns - 1
