@@ -5,13 +5,9 @@
 \title{Run the CCG \code{varcalc} Program to Calculate Experimental Variograms.}
 \usage{
 varcalcR(data, vars, xyz = c("x", "y"), vpar = list(dir1 = c(azm = 0,
-  azmtol = 22.5, bndhorz = 1000, dip = 0, diptol = 22.5, bndvert = 1000,
-  tilt = 0, nlags = 10, dlag = 30, lagtol = 15), dir2 = c(azm = 90, azmtol
-  = 22.5, bndhorz = 1000, dip = 0, diptol = 22.5, bndvert = 1000, tilt = 0,
-  nlags = 10, dlag = 30, lagtol = 15), dir3 = c(azm = 0, azmtol = 22.5,
-  bndhorz = 1000, dip = 90, diptol = 22.5, bndvert = 1000, tilt = 0, nlags
-  = 10, dlag = 30, lagtol = 15)), standardize = 0, legacy = 0,
-  check = 1, debug = FALSE)
+  azmtol = 90, bandhorz = 1e+21, dip = 0, diptol = 90, bandvert = 1e+21,
+  tilt = 0, nlags = 10, lagdist = 30, lagtol = 15)), variostd = FALSE,
+  variosills = NULL, legacy = FALSE, strict = TRUE, debug = TRUE)
 }
 \arguments{
 \item{data}{Data frame of sample data.}
@@ -24,23 +20,34 @@ fields, 2 for 2D and 3 for 3D.}
 \item{vpar}{list of named vectors containing parameters for each variogram
 direction to be calculated. See function argument default for spec.}
 
-\item{standardize}{Scalar integer either 0 or 1. 1: standardize the sill.}
+\item{variostd}{Scalar boolean, if \code{TRUE} standardize the sill.}
 
-\item{legacy}{Scalar integer either 0 or 1. 1: output legacy format.}
+\item{variosills}{Numeric scalar. Sill to standardize to if \code{variostd}
+is \code{TRUE}. Default \code{NULL} means let program decide.}
 
-\item{check}{Scalar integer either 0 or 1. 1: run input checks.}
+\item{legacy}{Scalar boolean, if \code{TRUE} output legacy format.}
+
+\item{strict}{Scalar boolean, if \code{TRUE} run input checks.}
 
 \item{debug}{Scalar boolean. If \code{TRUE} don't delete temporary system
 files.}
 }
 \value{
-A data frame with calculated variogram data.
+A data frame with calculated variogram data. Side effect is output
+variogram calculation file from \code{varcalc} program. This file is used
+by other programs such as \code{varmod}.
 }
 \description{
-\code{varcalcR} calculates experimental variograms. THis process is suited to
+\code{varcalcR} calculates experimental variograms. This process is suited to
 irregulalry spaced data such as samples. If more than one variable is input
-all possible semi-variograms and cross-variograms are calculated. Trimming
-limits are fixed to -1.0e21 and +1.0e21.
+all possible semi-variograms and cross-variograms are calculated. Default
+arguments will create omni-directional 2D variograms for each variable.
+}
+\details{
+Variogram calculation parameters are provided as a list of vectors for each
+direction. The default list provided in the function argument list uses a
+named vector. The vector does not need ot me named but values must be
+provided in the order shown.
 }
 \examples{
 test <- unscoreR(samples_2d, c("thk", "accum"))

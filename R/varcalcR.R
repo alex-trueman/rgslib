@@ -3,7 +3,12 @@
 #' \code{varcalcR} calculates experimental variograms. This process is suited to
 #' irregulalry spaced data such as samples. If more than one variable is input
 #' all possible semi-variograms and cross-variograms are calculated. Default
-#' arguments will create omni-directional variograms for each variable.
+#' arguments will create omni-directional 2D variograms for each variable.
+#'
+#' Variogram calculation parameters are provided as a list of vectors for each
+#' direction. The default list provided in the function argument list uses a
+#' named vector. The vector does not need ot me named but values must be
+#' provided in the order shown.
 #'
 #' @param data Data frame of sample data.
 #' @param vars Character vector, column names in \code{data} for variograms.
