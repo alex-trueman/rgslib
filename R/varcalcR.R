@@ -12,6 +12,7 @@
 #'
 #' @param data Data frame of sample data.
 #' @param vars Character vector, column names in \code{data} for variograms.
+#' @param sysout Character: name of GSLIB-format experimental variogram file.
 #' @param xyz Character vector, column names in \code{data} for coordinate
 #'   fields, 2 for 2D and 3 for 3D.
 #' @param vpar list of named vectors containing parameters for each variogram
@@ -21,6 +22,8 @@
 #'   is \code{TRUE}. Default \code{NULL} means let program decide.
 #' @param legacy Scalar boolean, if \code{TRUE} output legacy format.
 #' @param strict Scalar boolean, if \code{TRUE} run input checks.
+#' @param single Boolean: produce a single variogram rather than direct and
+#'   cross variograms.
 #' @param debug Scalar boolean. If \code{TRUE} don't delete temporary system
 #'   files.
 #'
@@ -30,13 +33,14 @@
 #' @export
 #' @examples
 #' test <- unscoreR(samples_2d, c("thk", "accum"))
-#' data <- varcalcR(test$data, vars=c("NS_thk"))
+#' data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc-out.dat")
 varcalcR <- function(
-  data, vars, xyz=c("x", "y"),
+  data, vars, sysout, xyz=c("x", "y"),
   vpar=list(dir1=c(azm=0, azmtol=90,
     bandhorz=1.0e+21, dip=0, diptol=90, bandvert=1.0e+21, tilt=0, nlags=10,
     lagdist=30, lagtol=15)),
-  variostd=FALSE, variosills=NULL, legacy=FALSE, strict=TRUE, debug=TRUE
+  variostd=FALSE, variosills=NULL, legacy=FALSE, strict=TRUE, single=TRUE,
+  debug=TRUE
 ) {
 
   # Get column indices.
@@ -58,7 +62,7 @@ varcalcR <- function(
   # Number of variables.
   nvars <- length(vars)
   # Number of variograms.
-  if(nvars == 1) {
+  if(nvars == 1 | single) {
     nvarios <- 1
   } else {
     nvarios <- (factorial(nvars) / (factorial(2) *
@@ -83,42 +87,43 @@ varcalcR <- function(
   }
   parstring <- c(
     parstring,
-    "varcalc-out.dat  ",
+    paste0(sysout, "  "),
     paste0(as.numeric(legacy), "  "),
     paste0(as.numeric(strict), "  "),
     paste0(as.numeric(variostd), "  "),
     paste0(nvarios, "  ")
   )
   # Add variogram type definition for the variograms.
-  # Also make a 'dictionary' for merging character variable snames on return.
-  vars_df <- data.frame(
-    head = numeric(), tail = numeric(),
-    head_a = character(), tail_a = character())
-  for(v in 1:nvars) {
+  if(single & nvars == 2) {
     parstring <- c(
       parstring,
-      paste0(v, "  ", v, "  1  ", variosills, "  ")
+      paste0("1  2  2  ", variosills, "  ")
     )
-    vars_df <- rbind(vars_df, data.frame(head = v, tail = v,
-      head_a = vars[v], tail_a = vars[v]))
-  }
-  # Add variogram type definition for the cross-variograms.
-  t1start <- 1
-  t2start <- 2
-  nruns <- nvarios - nvars
-  while(nruns > 0) {
-    t2 <- t2start
-    for(cv in 1:(nvars - t1start)) {
+  } else {
+     for(v in 1:nvars) {
       parstring <- c(
         parstring,
-        paste0(t1start, "  ", t2, "  2  ", variosills, "  ")
+        paste0(v, "  ", v, "  1  ", variosills, "  ")
       )
-      t2 <- t2 + 1
-      nruns <- nruns - 1
     }
-    t1start <- t1start + 1
-    t2start <- t2start + 1
-  }
+    # Add variogram type definition for the cross-variograms.
+    t1start <- 1
+    t2start <- 2
+    nruns <- nvarios - nvars
+    while(nruns > 0) {
+      t2 <- t2start
+      for(cv in 1:(nvars - t1start)) {
+        parstring <- c(
+          parstring,
+          paste0(t1start, "  ", t2, "  2  ", variosills, "  ")
+        )
+        t2 <- t2 + 1
+        nruns <- nruns - 1
+      }
+      t1start <- t1start + 1
+      t2start <- t2start + 1
+    }
+ }
 
   # Write parameters to a file.
   file_conn <- file("varcalc.par")
@@ -132,21 +137,14 @@ varcalcR <- function(
   shell("varcalc varcalc.par")
 
   # Read the output of `varcalc` and format for return.
-  vario_data <- read_gslib("varcalc-out.dat")
+  vario_data <- read_gslib(sysout)
   new_col_names <- c("set", "h", "np", "gamma", "vario", "azi", "dip", "type",
     "tail", "head")
   names(vario_data) <- new_col_names
-  vario_data <- merge(x = vario_data, y = vars_df[,c(2, 4)],
-    by = "tail", all.x = TRUE)
-  vario_data <- merge(x = vario_data, y = vars_df[,c(1, 3)],
-    by = "head", all.x = TRUE)
-  vario_data[,"vars"] <- paste0(vario_data[,"tail_a"], "-",
-    vario_data[,"head_a"])
-  vario_data <- vario_data[,-c(1:2, 11:12)]
 
   # Clean up.
   if(!debug) {
-    shell("del varcalc.par varcalc-in.dat varcalc-out.dat")
+    shell("del varcalc.par varcalc-in.dat")
   }
 
   return(vario_data)
