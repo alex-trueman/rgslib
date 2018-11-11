@@ -3,5 +3,3 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^data-raw$
-^R/varmod\.R$
-^R/vl_lmc\.R$
