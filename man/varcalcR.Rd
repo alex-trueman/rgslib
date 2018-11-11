@@ -4,15 +4,18 @@
 \alias{varcalcR}
 \title{Run the CCG \code{varcalc} Program to Calculate Experimental Variograms.}
 \usage{
-varcalcR(data, vars, xyz = c("x", "y"), vpar = list(dir1 = c(azm = 0,
-  azmtol = 90, bandhorz = 1e+21, dip = 0, diptol = 90, bandvert = 1e+21,
-  tilt = 0, nlags = 10, lagdist = 30, lagtol = 15)), variostd = FALSE,
-  variosills = NULL, legacy = FALSE, strict = TRUE, debug = TRUE)
+varcalcR(data, vars, sysout, xyz = c("x", "y"), vpar = list(dir1 =
+  c(azm = 0, azmtol = 90, bandhorz = 1e+21, dip = 0, diptol = 90, bandvert
+  = 1e+21, tilt = 0, nlags = 10, lagdist = 30, lagtol = 15)),
+  variostd = FALSE, variosills = NULL, legacy = FALSE,
+  strict = TRUE, single = TRUE, debug = TRUE)
 }
 \arguments{
 \item{data}{Data frame of sample data.}
 
 \item{vars}{Character vector, column names in \code{data} for variograms.}
+
+\item{sysout}{Character: name of GSLIB-format experimental variogram file.}
 
 \item{xyz}{Character vector, column names in \code{data} for coordinate
 fields, 2 for 2D and 3 for 3D.}
@@ -28,6 +31,9 @@ is \code{TRUE}. Default \code{NULL} means let program decide.}
 \item{legacy}{Scalar boolean, if \code{TRUE} output legacy format.}
 
 \item{strict}{Scalar boolean, if \code{TRUE} run input checks.}
+
+\item{single}{Boolean: produce a single variogram rather than direct and
+cross variograms.}
 
 \item{debug}{Scalar boolean. If \code{TRUE} don't delete temporary system
 files.}
@@ -51,5 +57,5 @@ provided in the order shown.
 }
 \examples{
 test <- unscoreR(samples_2d, c("thk", "accum"))
-data <- varcalcR(test$data, vars=c("NS_thk"))
+data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc-out.dat")
 }
