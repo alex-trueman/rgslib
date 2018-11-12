@@ -48,5 +48,4 @@ The number of variogram maps produced is fixed at 1.
 test <- unscoreR(samples_2d, c("thk", "accum"))
 data <- varmapR(test$data, vars=c("NS_thk"), minpair = 1,
   nlag = c(100, 100, 1), dlag = c(20, 20, 1))
-
 }

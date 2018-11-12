@@ -25,7 +25,6 @@
 #' par(mfrow=c(1,2))
 #' hist(samples_ns$data$accum, breaks=30, main="raw", xlab="accum")
 #' hist(samples_ns$data$NS_accum, main="normal", xlab="nscore accum")
-#'
 unscoreR <- function(
   data, vars, weight=NULL, cat=NULL, quantiles=0, debug=FALSE
   ) {

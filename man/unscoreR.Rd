@@ -39,5 +39,4 @@ samples_ns <- unscoreR(samples_2d, c("thk", "accum"))
 par(mfrow=c(1,2))
 hist(samples_ns$data$accum, breaks=30, main="raw", xlab="accum")
 hist(samples_ns$data$NS_accum, main="normal", xlab="nscore accum")
-
 }

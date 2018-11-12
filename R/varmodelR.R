@@ -53,7 +53,6 @@
 #'   the case of a 2D variogram the semi-major and minor axes have the same
 #'   parameters.
 #' @export
-#' @examples
 varmodelR <- function(
   expdata, sysout, ndir=1, nst=10,
   c0="0.05:0.25", it=1, cc="?", azm=0, dip=0, tilt=0, ahmax="?", ahmin="?",

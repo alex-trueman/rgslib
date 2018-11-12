@@ -27,8 +27,6 @@
 #' test <- unscoreR(samples_2d, c("thk", "accum"))
 #' data <- varmapR(test$data, vars=c("NS_thk"), minpair = 1,
 #'   nlag = c(100, 100, 1), dlag = c(20, 20, 1))
-
-#'
 varmapR <- function(
   data, vars, regular=0, grid=c(0, 0, 0, 0, 0, 0), xyz=c("x", "y"),
   nlag=c(50, 50, 0), dlag=c(5, 5, 5), minpair=5, standardize=0,

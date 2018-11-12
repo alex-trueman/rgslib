@@ -4,7 +4,6 @@
 #' It auotmaticaly models direct and cross variograms given experimental points
 #' and models fo the direc variograms.
 #'
-#'
 #' @param nvars Scalar numeric: number of variables being modelled.
 #' @param corr0 Numeric vector: cross-variogram nugget effects.
 #' @param corrmatrix Numeric matrix: correlation matrix (e.g., from \code{cor}).
@@ -16,11 +15,9 @@
 #' @param maxiter Scalar integer: number of fitting iterations.
 #' @param varfitslmc Character: prefix of output variogram model files.
 #' @param corrs Character: output correlation matrix system file.
-#'
 #' @return A list with two data frames: `model` contains the variogram models
 #'   and `corrs` contains the model cross-variogram sills for validation.
 #' @export
-#' @examples
 vl_lmcR <- function(nvars, corr0, corrmatrix, varcalcs="vg_", varfits="vm_",
   invdistwt=TRUE, npairswt=TRUE, minpairs=10, maxiter=100, varfitslmc="vl_",
   corrs="corrs.txt") {
