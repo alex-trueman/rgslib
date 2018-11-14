@@ -97,3 +97,92 @@ write_gslib <- function(data, path, round = 4, title = NULL) {
   invisible(data)
 
 }
+
+#' Import GSLIB Variogram Model Format Data to a Data Frame.
+#'
+#' \code{read_gslib_mvario} imports from GSLIB variogram model format. All
+#' columns are read as doubles as GSLIB does not support non-numeric data
+#' columns.
+#'
+#' @param path Path or connection to read from.
+#' @return A data frame.
+#' @export
+#' @importFrom dplyr left_join select
+#' @importFrom magrittr %>% %<>%
+#' @importFrom readr read_lines
+#' @importFrom rlang .data
+read_gslib_mvario <- function(path) {
+
+  # Get number of structures and nugget effect.
+  datadef <- unlist(strsplit(
+    sub("^ +", "", read_lines(path, n_max = 1)), split = " +"))
+  nst <- as.integer(datadef[1])
+  c0 <- as.numeric(datadef[2])
+
+  # Create variogram model data frame.
+  mvario <- data.frame(
+    type=numeric(length = nst + 1),
+    psill=numeric(length = nst + 1),
+    range=numeric(length = nst + 1),
+    anis1=numeric(length = nst + 1),
+    anis2=numeric(length = nst + 1),
+    ang1=numeric(length = nst + 1),
+    ang2=numeric(length = nst + 1),
+    ang3=numeric(length = nst + 1)
+  )
+  mvario[mvario == 0] <- NA
+
+  # Populate nugget.
+  mvario[1,"type"] <- 0
+  mvario[1,"psill"] <- c0
+  mvario[1,"range"] <- 0
+
+  # Populate structures.
+  record <- 1
+  structures <- sub("^ +", "", read_lines(path, skip = 1))
+  for(st in seq(1, length(structures) - 1, by = 2)) {
+    record <- record + 1
+    line1 <- as.numeric(unlist(strsplit(structures[st], split = " +"))[1:5])
+    line2 <- as.numeric(unlist(strsplit(structures[st + 1], split = " +"))[1:3])
+    if(st == 1) {
+      mvario[1, "ang1"] <- line1[3]
+      mvario[1, "ang2"] <- line1[4]
+      mvario[1, "ang3"] <- line1[5]
+    }
+    mvario[record, "type"] <- line1[1]
+    mvario[record, "psill"] <- line1[2]
+    mvario[record, "range"] <- line2[1]
+    mvario[record, "anis1"] <- ifelse(
+      line2[2] / line2[1] > 1, 1, line2[2] / line2[1])
+    mvario[record, "anis2"] <- ifelse(
+      line2[3] / line2[1] > 1, 1, line2[3] / line2[1])
+    mvario[record, "ang1"] <- line1[3]
+    mvario[record, "ang2"] <- line1[4]
+    mvario[record, "ang3"] <- line1[5]
+  }
+
+  # Create data frame of class "gstat::variogramModel".
+  mvario %<>%
+    left_join(.data$structure_types(), by = "type") %>%
+    select(.data$model, .data$psill, .data$range, .data$ang1, .data$ang2,
+      .data$ang3, .data$anis1, .data$anis2)
+
+  class(mvario) <- c("variogramModel", "data.frame")
+
+  return(mvario)
+
+}
+
+#' Valid Variogram Model Structure Types
+#'
+#' Links GSLIB numeric structure types to \code{gstat} short alphanumeric
+#' structure types.
+#'
+#' @return Data frame of structure types.
+structure_types <- function() {
+  x <- data.frame(
+    type = c(0, 1, 2, 3, 4),
+    model = c("Nug", "Sph", "Exp", "Gau", "Hol")
+  )
+  return(x)
+}
