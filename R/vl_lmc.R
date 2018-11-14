@@ -6,7 +6,7 @@
 #'
 #' @param nvars Scalar numeric: number of variables being modelled.
 #' @param corr0 Numeric vector: cross-variogram nugget effects.
-#' @param corrmatrix Numeric matrix: correlation matrix (e.g., from \code{cor}).
+#' @param corr Numeric matrix: correlation matrix (e.g., from \code{cor}).
 #' @param varcalcs Character: prefix of experimental variogram files.
 #' @param varfits Character: prefix of direct variogram model files.
 #' @param invdistwt Boolean: inverse distance weighting.
@@ -17,8 +17,13 @@
 #' @param corrs Character: output correlation matrix system file.
 #' @return A list with two data frames: `model` contains the variogram models
 #'   and `corrs` contains the model cross-variogram sills for validation.
+#' @importFrom dplyr mutate select
+#' @importFrom magrittr %>%
+#' @importFrom purrr map
+#' @importFrom rlang .data set_names
+#' @importFrom tidyselect everything
 #' @export
-vl_lmcR <- function(nvars, corr0, corrmatrix, varcalcs="vg_", varfits="vm_",
+vl_lmcR <- function(nvars, corr0, corr, varcalcs="vg_", varfits="vm_",
   invdistwt=TRUE, npairswt=TRUE, minpairs=10, maxiter=100, varfitslmc="vl_",
   corrs="corrs.txt") {
 
@@ -28,10 +33,18 @@ vl_lmcR <- function(nvars, corr0, corrmatrix, varcalcs="vg_", varfits="vm_",
     paste0(
       nvars, "  \n",
       varcalcs, "  \n",
-      varfits, "  \n",
-      paste(corrmatrix, collapse = "  "),
-      paste(corr0, collapse = "  "),
-      invdistwt, "  ", npairswt, "  ", minpairs, "  \n",
+      varfits, "  "
+    )
+  )
+  # Correlation matrix.
+  for(i in 1:nvars) {
+    parstring <- c(parstring, paste(corr[i,], collapse = "  "))
+  }
+  parstring <- c(
+    parstring,
+    paste0(
+      paste(corr0, collapse = "  "), "\n",
+      as.numeric(invdistwt), "  ", as.numeric(npairswt), "  ", minpairs, "  \n",
       maxiter, "  \n",
       varfitslmc, "  \n",
       corrs, "  "
@@ -43,9 +56,27 @@ vl_lmcR <- function(nvars, corr0, corrmatrix, varcalcs="vg_", varfits="vm_",
   writeLines(parstring, file_conn)
   close(file_conn)
 
+  # Delete pre-existing `vl_lmc` outputs.
+  shell(paste0("del ", varfitslmc, "*.var"))
   # Run the `vl_lmc` program.
   shell("vl_lmc vl_lmc.par")
 
-  invisible(nvars)
+  # Import GSLIB variogram models.
+  models <- list.files(
+    ".",
+    pattern = paste0(varfitslmc, ".+\\.var"),
+    full.names = TRUE
+  ) %>%
+    set_names(basename(.data)) %>%
+    map(read_gslib_mvario)
+  names(models) <- sub(
+    paste0("^", varfitslmc, "([0-9]+)_([0-9]+)\\.var"),
+    "\\1_\\2",
+    names(models)
+  )
+
+  class(models) <- c("variogramModelList", "list")
+
+  return(models)
 
 }
