@@ -15,7 +15,9 @@ varcalcR(data, vars, sysout, xyz = c("x", "y"), vpar = list(dir1 =
 
 \item{vars}{Character vector, column names in \code{data} for variograms.}
 
-\item{sysout}{Character: name of GSLIB-format experimental variogram file.}
+\item{sysout}{Character: name of GSLIB-format experimental variogram file
+without the extension part, and extension of ".out" is added for
+compatibility with \code{vl_lmc}.}
 
 \item{xyz}{Character vector, column names in \code{data} for coordinate
 fields, 2 for 2D and 3 for 3D.}
@@ -39,9 +41,10 @@ cross variograms.}
 files.}
 }
 \value{
-A data frame with calculated variogram data. Side effect is output
-variogram calculation file from \code{varcalc} program. This file is used
-by other programs such as \code{varmod}.
+A data frame of class "gstat::gstatVariogram" with calculated
+variogram data. Side effect is output variogram calculation file from
+\code{varcalc} program. This file is used by other programs such as
+\code{varmod}.
 }
 \description{
 \code{varcalcR} calculates experimental variograms. This process is suited to
@@ -57,5 +60,5 @@ provided in the order shown.
 }
 \examples{
 test <- unscoreR(samples_2d, c("thk", "accum"))
-data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc-out.dat")
+data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc")
 }

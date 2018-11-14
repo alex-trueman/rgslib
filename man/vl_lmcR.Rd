@@ -4,7 +4,7 @@
 \alias{vl_lmcR}
 \title{Run the CCG \code{vl_lmc} to Automatically Model Multivariate Variograms}
 \usage{
-vl_lmcR(nvars, corr0, corrmatrix, varcalcs = "vg_", varfits = "vm_",
+vl_lmcR(nvars, corr0, corr, varcalcs = "vg_", varfits = "vm_",
   invdistwt = TRUE, npairswt = TRUE, minpairs = 10, maxiter = 100,
   varfitslmc = "vl_", corrs = "corrs.txt")
 }
@@ -13,7 +13,7 @@ vl_lmcR(nvars, corr0, corrmatrix, varcalcs = "vg_", varfits = "vm_",
 
 \item{corr0}{Numeric vector: cross-variogram nugget effects.}
 
-\item{corrmatrix}{Numeric matrix: correlation matrix (e.g., from \code{cor}).}
+\item{corr}{Numeric matrix: correlation matrix (e.g., from \code{cor}).}
 
 \item{varcalcs}{Character: prefix of experimental variogram files.}
 

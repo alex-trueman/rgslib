@@ -13,9 +13,12 @@ varmodelR(expdata, sysout, ndir = 1, nst = 10, c0 = "0.05:0.25",
 }
 \arguments{
 \item{expdata}{Character: name of input GSLIB-format experiemental variogram
-file.}
+file without the extnsion part, and extension of ".out" is added for
+compatibility with \code{vl_lmc}.}
 
-\item{sysout}{Character: name of output GSLIB-format variogram model file.}
+\item{sysout}{Character: name of output GSLIB-format variogram model file
+without the extnsion part, and extension of ".var" is added for
+compatibility with \code{vl_lmc}.}
 
 \item{ndir}{Numeric integer: number of directions to model.}
 
