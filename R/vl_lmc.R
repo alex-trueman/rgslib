@@ -67,7 +67,7 @@ vl_lmcR <- function(nvars, corr0, corr, varcalcs="vg_", varfits="vm_",
     pattern = paste0(varfitslmc, ".+\\.var"),
     full.names = TRUE
   ) %>%
-    set_names(basename(.data)) %>%
+    set_names(basename()) %>%
     map(read_gslib_mvario)
   names(models) <- sub(
     paste0("^", varfitslmc, "([0-9]+)_([0-9]+)\\.var"),
