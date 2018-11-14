@@ -12,7 +12,9 @@
 #'
 #' @param data Data frame of sample data.
 #' @param vars Character vector, column names in \code{data} for variograms.
-#' @param sysout Character: name of GSLIB-format experimental variogram file.
+#' @param sysout Character: name of GSLIB-format experimental variogram file
+#'   without the extension part, and extension of ".out" is added for
+#'   compatibility with \code{vl_lmc}.
 #' @param xyz Character vector, column names in \code{data} for coordinate
 #'   fields, 2 for 2D and 3 for 3D.
 #' @param vpar list of named vectors containing parameters for each variogram
@@ -26,14 +28,17 @@
 #'   cross variograms.
 #' @param debug Scalar boolean. If \code{TRUE} don't delete temporary system
 #'   files.
-#'
-#' @return A data frame with calculated variogram data. Side effect is output
-#'   variogram calculation file from \code{varcalc} program. This file is used
-#'   by other programs such as \code{varmod}.
+#' @return A data frame of class "gstat::gstatVariogram" with calculated
+#'   variogram data. Side effect is output variogram calculation file from
+#'   \code{varcalc} program. This file is used by other programs such as
+#'   \code{varmod}.
+#' @importFrom dplyr mutate select
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @export
 #' @examples
 #' test <- unscoreR(samples_2d, c("thk", "accum"))
-#' data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc-out.dat")
+#' data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc")
 varcalcR <- function(
   data, vars, sysout, xyz=c("x", "y"),
   vpar=list(dir1=c(azm=0, azmtol=90,
@@ -87,7 +92,7 @@ varcalcR <- function(
   }
   parstring <- c(
     parstring,
-    paste0(sysout, "  "),
+    paste0(sysout, ".out  "),
     paste0(as.numeric(legacy), "  "),
     paste0(as.numeric(strict), "  "),
     paste0(as.numeric(variostd), "  "),
@@ -100,7 +105,7 @@ varcalcR <- function(
       paste0("1  2  2  ", variosills, "  ")
     )
   } else {
-     for(v in 1:nvars) {
+    for(v in 1:nvars) {
       parstring <- c(
         parstring,
         paste0(v, "  ", v, "  1  ", variosills, "  ")
@@ -123,7 +128,7 @@ varcalcR <- function(
       t1start <- t1start + 1
       t2start <- t2start + 1
     }
- }
+  }
 
   # Write parameters to a file.
   file_conn <- file("varcalc.par")
@@ -137,10 +142,13 @@ varcalcR <- function(
   shell("varcalc varcalc.par")
 
   # Read the output of `varcalc` and format for return.
-  vario_data <- read_gslib(sysout)
-  new_col_names <- c("set", "h", "np", "gamma", "vario", "azi", "dip", "type",
-    "tail", "head")
-  names(vario_data) <- new_col_names
+  vario_data <- read_gslib(paste0(sysout, ".out")) %>%
+    mutate(id = paste0(
+      .data$VariogramTailIndex, "-", .data$VariogramHeadIndex)) %>%
+    select(np = .data$NumberofPairs, dist = .data$LagDistance,
+      gamma = .data$VariogramValue, dir.hor = .data$CalculationAzimuth,
+      dir.ver = .data$CalculationDip, .data$id)
+  class(vario_data) <- c("gstatVariogram", "data.frame")
 
   # Clean up.
   if(!debug) {
@@ -150,4 +158,3 @@ varcalcR <- function(
   return(vario_data)
 
 }
-
