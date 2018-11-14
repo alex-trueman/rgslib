@@ -29,21 +29,25 @@ unscoreR <- function(
   data, vars, weight=NULL, cat=NULL, quantiles=0, debug=FALSE
   ) {
 
+  # Get numeric columns only. GSLIB only handles numeric data.
+  nums <- unlist(lapply(data, is.numeric))
+  data_num <- data[,nums]
+
   # Get column indices.
-  vars_i <- paste(which(colnames(data) %in% vars), collapse = "  ")
+  vars_i <- paste(which(colnames(data_num) %in% vars), collapse = "  ")
   if(!is.null(weight)){
-    weight_i <- which(colnames(data) == weight)
+    weight_i <- which(colnames(data_num) == weight)
   } else {
     weight_i <- 0
   }
   if(!is.null(cat)){
-    cat_i <- which(colnames(data) == cat)
+    cat_i <- which(colnames(data_num) == cat)
   } else {
     cat_i <- 0
   }
 
   # Export data for external program.
-  write_gslib(data, "unscore-in.dat", title="Sample data")
+  write_gslib(data_num, "unscore-in.dat", title="Sample data")
 
   # Build a parameter file for the unscore executable.
   file_conn <- file("unscore.par")
@@ -54,7 +58,7 @@ unscoreR <- function(
       length(vars), "  ", vars_i, "  \n",
       weight_i, "  \n",
       cat_i, "  \n",
-      nrow(data), "  \n",
+      nrow(data_num), "  \n",
       "-1.0e21  1.0e21  \n",
       "0  \n",
       "\n",
