@@ -17,8 +17,11 @@
 #'   support the '?' wildcard due to a possible bug in the Frotran program.
 #'
 #' @param expdata Character: name of input GSLIB-format experiemental variogram
-#'   file.
-#' @param sysout Character: name of output GSLIB-format variogram model file.
+#'   file without the extnsion part, and extension of ".out" is added for
+#'   compatibility with \code{vl_lmc}.
+#' @param sysout Character: name of output GSLIB-format variogram model file
+#'   without the extnsion part, and extension of ".var" is added for
+#'   compatibility with \code{vl_lmc}.
 #' @param ndir Numeric integer: number of directions to model.
 #' @param nst Scalar integer: number of structures to model. Default 10.
 #' @param c0 Scalar numeric: nugget effect or wildcard.
@@ -65,7 +68,7 @@ varmodelR <- function(
   parstring <- c(
     "START OF PARAMETERS:",
     paste0(
-      "disc-mod.data  \n",
+      "varmodel-disc.out  \n",
       ndir, "  "
     )
   )
@@ -96,12 +99,12 @@ varmodelR <- function(
       as.numeric(fit), "  ", maxiter, "  \n",
       vargsill, "  \n",
       "1  \n",
-      expdata,"  \n",
+      expdata,".out  \n",
       ndir, "  ", paste(vario, collapse = "  "), "  \n",
       as.numeric(npairswt), "  ", as.numeric(invdistwt), "  ", minpairs, "  \n",
       as.numeric(fixhmaxvertanis), "  ", hmaxvertanis, "  \n",
       as.numeric(fixhmaxhminanis), "  ", hmaxhminanis, "  \n",
-      sysout, "  "
+      sysout, ".var  "
     )
   )
 
@@ -113,13 +116,12 @@ varmodelR <- function(
   # Run the external program.
   shell("varmodel varmodel.par")
 
-  # Import the discretized model for plotting.
-  disc_vmod <- read_gslib("disc-mod.data")
-  new_col_names <- c("set", "h", "np", "gamma", "vario", "azi", "dip")
-  names(disc_vmod) <- new_col_names
-  # Clean up some files.
-  shell("del disc-mod.data")
+  # Import the model.
+  model <- read_gslib_mvario(paste0(sysout, ".var"))
 
-  return(disc_vmod)
+  # Clean up some files.
+  shell("del varmodel-disc.out")
+
+  return(model)
 
 }
