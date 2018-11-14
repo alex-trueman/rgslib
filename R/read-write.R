@@ -163,7 +163,7 @@ read_gslib_mvario <- function(path) {
 
   # Create data frame of class "gstat::variogramModel".
   mvario %<>%
-    left_join(.data$structure_types(), by = "type") %>%
+    left_join(structure_types(), by = "type") %>%
     select(.data$model, .data$psill, .data$range, .data$ang1, .data$ang2,
       .data$ang3, .data$anis1, .data$anis2)
 
