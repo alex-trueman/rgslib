@@ -3,7 +3,7 @@ Title: R Interface to GSLIB/CCG Programs
 Version: 0.0.2
 Authors@R: person("Alex", "Trueman", email = "amt4158@gmail.com", role = c("aut", "cre"))
 Description: Provide an interface for running GSLIB/CCG functions on data in R.
-    Compiled Fortran executables are run by being called from R.
+ Compiled Fortran executables are run by being called from R.
 URL: https://github.com/truemoid/rgslib
 BugReports: https://github.com/truemoid/rgslib
 Depends: R (>= 3.5.0)
