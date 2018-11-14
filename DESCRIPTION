@@ -15,8 +15,12 @@ RoxygenNote: 6.1.1
 Imports:
     data.table (>= 1.11),
     dplyr (>= 0.7),
+    magrittr (>= 1.5),
     readr (>= 1.1),
+    purrr (>= 0.2),
     stats,
+    rlang (>= 0.3),
+    tidyselect (>= 0.2),
     utils
 Suggests: 
     spelling
