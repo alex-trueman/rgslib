@@ -165,7 +165,7 @@ read_gslib_mvario <- function(path) {
   mvario %<>%
     left_join(structure_types(), by = "type") %>%
     select(.data$model, .data$psill, .data$range, .data$ang1, .data$ang2,
-      .data$ang3, .data$anis1, .data$anis2)
+      .data$ang3, .data$anis1, .data$anis2, .data$type)
 
   class(mvario) <- c("variogramModel", "data.frame")
 
