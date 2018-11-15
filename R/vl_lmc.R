@@ -79,6 +79,11 @@ vl_lmcR <- function(nvars, corr0, corr, varcalcs="vg_", varfits="vm_",
   models <- imap(models, ~mutate(
     .x, var1 = sub("(.+)_(.+)", "\\1", .y), var2 = sub("(.+)_(.+)", "\\2", .y)))
 
+  # Re-set class of data frames as imap removes the class "variogramModel".
+  for(df in seq_along(models)){
+    class(models[[df]]) <- c("variogramModel", "data.frame")
+  }
+
   class(models) <- c("variogramModelList", "list")
 
   return(models)
