@@ -74,7 +74,8 @@ vl_lmcR <- function(nvars, corr0, corr, varcalcs="vg_", varfits="vm_",
     "\\1_\\2",
     names(models)
   )
-
+  # Add var1 and var2 columns used in `usgsimR` when bulding mvario parameter
+  # string.
   models <- imap(models, ~mutate(
     .x, var1 = sub("(.+)_(.+)", "\\1", .y), var2 = sub("(.+)_(.+)", "\\2", .y)))
 
