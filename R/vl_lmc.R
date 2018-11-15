@@ -19,7 +19,7 @@
 #'   and `corrs` contains the model cross-variogram sills for validation.
 #' @importFrom dplyr mutate select
 #' @importFrom magrittr %>%
-#' @importFrom purrr map
+#' @importFrom purrr imap map
 #' @importFrom rlang .data set_names
 #' @importFrom tidyselect everything
 #' @export
@@ -74,6 +74,9 @@ vl_lmcR <- function(nvars, corr0, corr, varcalcs="vg_", varfits="vm_",
     "\\1_\\2",
     names(models)
   )
+
+  models <- imap(models, ~mutate(
+    .x, var1 = sub("(.+)_(.+)", "\\1", .y), var2 = sub("(.+)_(.+)", "\\2", .y)))
 
   class(models) <- c("variogramModelList", "list")
 
