@@ -43,7 +43,7 @@ varcalcR <- function(
   data, vars, sysout, xyz=c("x", "y"),
   vpar=list(dir1=c(azm=0, azmtol=90,
     bandhorz=1.0e+21, dip=0, diptol=90, bandvert=1.0e+21, tilt=0, nlags=10,
-    lagdist=30, lagtol=15)),
+    lagdist=30, lagtol=0.5)),
   variostd=FALSE, variosills=NULL, legacy=FALSE, strict=TRUE, single=TRUE,
   debug=TRUE
 ) {
@@ -88,7 +88,7 @@ varcalcR <- function(
     parstring <- c(
       parstring,
       paste(vpar[[dir]][1:7], collapse = " "),
-      paste(vpar[[dir]][8:10], collapse = " "))
+      paste(vpar[[dir]][8:9], vpar[[dir]][9] * vpar[[dir]][10], collapse = " "))
   }
   parstring <- c(
     parstring,

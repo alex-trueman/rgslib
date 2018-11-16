@@ -186,3 +186,65 @@ structure_types <- function() {
   )
   return(x)
 }
+
+#' Import \code{usgsim} regular output format and add coordinates.
+#'
+#' \code{read_gslib_usgsim} imports the regular output format of
+#'   \code{usgsim}. This format has no grid coordinates. Coordinates are
+#'   added based on the grid definition on line 2 of the \code{usgsim} output.
+#'
+#' @param path Path or connection to read from.
+#' @param vars Character vector of simulated column names.
+#' @return A data frame containing realization number, cartesian coordinates,
+#'   and simulated data.
+#' @export
+#' @importFrom data.table fread
+#' @importFrom dplyr mutate
+#' @importFrom magrittr %>%
+#' @importFrom readr read_lines
+read_gslib_usgsim <- function(path, vars) {
+
+  # Get the grid definition..
+  datadef <- as.numeric(unlist(strsplit(
+    sub("^ +", "", read_lines(path, skip = 1, n_max = 1)),
+    split = " +"
+  )))
+  nsimvar <- datadef[1]
+  n_x <- datadef[2]
+  n_y <- datadef[3]
+  n_z <- datadef[4]
+  min_x <- datadef[5]
+  min_y <- datadef[6]
+  min_z <- datadef[7]
+  dim_x <- datadef[8]
+  dim_y <- datadef[9]
+  dim_z <- datadef[10]
+  n_realz <- datadef[11]
+  grid_x <- seq(min_x, min_x + (dim_x * (n_x - 1)), dim_x)
+  grid_y <- seq(min_y, min_y + (dim_y * (n_y - 1)), dim_y)
+  grid_z <- seq(min_z, min_z + (dim_z * (n_z - 1)), dim_z)
+  n_grid_points <- n_x * n_y * n_z
+
+  # Read in the data. GSLIB column types are always numeric.
+  # `fread` is much better at reading this format than `readr::read_table2`,
+  # `readr` tries to create a column for trailing spaces, it doesn't but
+  # throws lots messy warnings.
+  data <- fread(
+    path,
+    col.names = vars,
+    skip = 2 + nsimvar,
+    na.strings = c("", "-1.0e21", "-999.00000", "-999"),
+    data.table = FALSE
+  )
+  data[, "r"] <- rep(1:n_realz, each = n_grid_points)
+  data[, "x"] <- rep(grid_x, times = n_realz, each = 1)
+  data[, "y"] <- rep(grid_y, times = n_realz, each = n_x)
+  data[, "z"] <- rep(grid_z, times = n_realz, each = n_x * n_y)
+  data <- data[, c("r", "x", "y", "z", vars)]
+
+  # Read the title to be added as a comment to the output data.
+  comment(data) <- as.character(read_lines(path, skip = 0, n_max = 1))
+
+  return(data)
+
+}
