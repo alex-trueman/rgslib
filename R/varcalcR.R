@@ -36,9 +36,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @export
-#' @examples
-#' test <- unscoreR(samples_2d, c("thk", "accum"))
-#' data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc")
 varcalcR <- function(
   data, vars, sysout, xyz=c("x", "y"),
   vpar=list(dir1=c(azm=0, azmtol=90,
@@ -48,15 +45,18 @@ varcalcR <- function(
   debug=TRUE
 ) {
 
+  # Cut down version of data.
+  data_gslib <- data[,c(xyz, vars)]
+
   # Get column indices.
-  vars_i <- paste(which(colnames(data) %in% vars), collapse = "  ")
+  vars_i <- paste(which(colnames(data_gslib) %in% vars), collapse = "  ")
   if(length(xyz) == 3) {
     # 3D data with z-coordinate.
-    xyz_i <- paste(which(colnames(data) %in% xyz), collapse = "  ")
+    xyz_i <- paste(which(colnames(data_gslib) %in% xyz), collapse = "  ")
   } else if(length(xyz) == 2) {
     # 2D data, no z-coordinate.
     xyz_i <- paste(c(
-      which(colnames(data) %in% xyz),
+      which(colnames(data_gslib) %in% xyz),
       0),
       collapse = "  ")
   } else {
@@ -85,10 +85,12 @@ varcalcR <- function(
   )
   # Add variogram calculation parameters for each direction.
   for(dir in seq_along(vpar)) {
+    lagtol <- vpar[[dir]]["dlag"] * vpar[[dir]]["lagtol"]
     parstring <- c(
       parstring,
-      paste(vpar[[dir]][1:7], collapse = " "),
-      paste(vpar[[dir]][8:9], vpar[[dir]][9] * vpar[[dir]][10], collapse = " "))
+      paste(vpar[[dir]][c("azm", "azmtol", "bndhorz", "dip", "diptol",
+        "bndvert", "tilt")], collapse = " "),
+      paste(c(vpar[[dir]][c("nlags", "dlag")], lagtol), collapse = " "))
   }
   parstring <- c(
     parstring,
@@ -136,7 +138,7 @@ varcalcR <- function(
   close(file_conn)
 
   # Export sample data for external program.
-  write_gslib(data, "varcalc-in.dat")
+  write_gslib(data_gslib, "varcalc-in.dat")
 
   # Run the `varcalc` program.
   shell("varcalc varcalc.par")
