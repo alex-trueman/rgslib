@@ -6,7 +6,7 @@
 \usage{
 varcalcR(data, vars, sysout, xyz = c("x", "y"), vpar = list(dir1 =
   c(azm = 0, azmtol = 90, bandhorz = 1e+21, dip = 0, diptol = 90, bandvert
-  = 1e+21, tilt = 0, nlags = 10, lagdist = 30, lagtol = 15)),
+  = 1e+21, tilt = 0, nlags = 10, lagdist = 30, lagtol = 0.5)),
   variostd = FALSE, variosills = NULL, legacy = FALSE,
   strict = TRUE, single = TRUE, debug = TRUE)
 }
@@ -57,8 +57,4 @@ Variogram calculation parameters are provided as a list of vectors for each
 direction. The default list provided in the function argument list uses a
 named vector. The vector does not need ot me named but values must be
 provided in the order shown.
-}
-\examples{
-test <- unscoreR(samples_2d, c("thk", "accum"))
-data <- varcalcR(test$data, vars=c("NS_thk"), sysout="varcalc")
 }
