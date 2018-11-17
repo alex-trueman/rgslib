@@ -4,7 +4,8 @@
 \alias{write_gslib}
 \title{Export a Data Frame to Simplified GeoEase Format Used by GSLIB.}
 \usage{
-write_gslib(data, path, round = 4, title = NULL)
+write_gslib(data, path, round = 4, title = NULL, griddim = NULL,
+  gridxyz = NULL, gridrealz = NULL)
 }
 \arguments{
 \item{data}{Data frame to write to disk, only numeric columns are exported.}
@@ -15,17 +16,29 @@ write_gslib(data, path, round = 4, title = NULL)
 
 \item{title}{Character title to be appended to GeoEase file. If not supplied
 it will be determined from \code{data} meta-data or it's name.}
+
+\item{griddim}{Numeric vector of xyz grid dimensions. Length 2 for 2D.}
+
+\item{gridxyz}{Character vector of grid xyz coordinate columns.}
+
+\item{gridrealz}{Scalar integer number of realizations if grid file.}
 }
 \value{
-\code{write_gslib} returns the input \code{data} invisibly.
+\code{write_gslib} returns the input \code{data} invisibly. The
+function side-effect is a GeoEase-format system file.
 }
 \description{
 \code{write_gslib} writes a data frame to the GeoEase format used by GSLIB
 programes. GeoEase has a standard header with a title and number and names of
 the columns. The title can be supplied or is built automatically from meta-
-data in the data frame or the name of the data fram object. Only numeric
-columns are written to the system file and they are rounded. This version
-not support wrting of the grid-format GSLIB data file.
+data in the data frame or the name of the data frame object. Only numeric
+columns are written to the system file and they are rounded.
+}
+\details{
+If grid argument \code{griddim} is given a grid definition will be written to
+the output GeoEase file. If there is more than 1 realization in the grid data
+the the input data frame (\code{data}) must be sorted by realization and must
+have the same number of records for each realization.
 }
 \examples{
 samples_na <- samples_2d
