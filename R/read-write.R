@@ -215,21 +215,23 @@ read_gslib_usgsim <- function(path, vars) {
   grid_def <- header$grid_def
 
   # Read the data.
-  read_gslib(path)
+  data <- read_gslib(path)
+  colnames(data) <- vars
 
   # Create coordinates and realizations.
-  n_grid_points <- grid_def$n_x * grid_def$n_y * grid_def$n_z
-  grid_x <- seq(grid_def$min_x, grid_def$min_x + (grid_def$dim_x *
-      (grid_def$n_x - 1)), grid_def$dim_x)
-  grid_y <- seq(grid_def$min_y, grid_def$min_y + (grid_def$dim_y *
-      (grid_def$n_y - 1)), grid_def$dim_y)
-  grid_z <- seq(grid_def$min_z, grid_def$min_z + (grid_def$dim_z *
-      (grid_def$n_z - 1)), grid_def$dim_z)
-  data[, "r"] <- rep(1:grid_def$n_realz, each = n_grid_points)
-  data[, "x"] <- rep(grid_x, times = grid_def$realz, each = 1)
-  data[, "y"] <- rep(grid_y, times = grid_def$realz, each = grid_def$n_x)
-  data[, "z"] <- rep(grid_z, times = grid_def$realz, each = grid_def$n_x *
-      grid_def$n_y)
+  n_grid_points <- grid_def["n_x"] * grid_def["n_y"] * grid_def["n_z"]
+  grid_x <- seq(grid_def["min_x"], grid_def["min_x"] + (grid_def["dim_x"] *
+      (grid_def["n_x"] - 1)), grid_def["dim_x"])
+  grid_y <- seq(grid_def["min_y"], grid_def["min_y"] + (grid_def["dim_y"] *
+      (grid_def["n_y"] - 1)), grid_def["dim_y"])
+  grid_z <- seq(grid_def["min_z"], grid_def["min_z"] + (grid_def["dim_z"] *
+      (grid_def["n_z"] - 1)), grid_def["dim_z"])
+  data[, "r"] <- rep(1:grid_def["realz"], each = n_grid_points)
+  data[, "x"] <- rep(grid_x, times = grid_def["realz"], each = 1)
+  data[, "y"] <- rep(grid_y, times = grid_def["realz"], each = grid_def["n_x"])
+  data[, "z"] <- rep(grid_z, times = grid_def["realz"], each = grid_def["n_x"] *
+      grid_def["n_y"])
+
   # Arrange columns.
   data <- data[, c("r", "x", "y", "z", vars)]
 
