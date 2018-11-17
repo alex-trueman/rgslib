@@ -14,18 +14,8 @@
 #' read_gslib(rgslib_example("samples-na.dat"))
 read_gslib <- function(path) {
 
-  # For future support of importing grid files that have additional information
-  # about the grid definition on the second line. Get the definition and remove
-  # any leading spaces.
-  datadef <- as.integer(unlist(strsplit(
-    sub("^ +", "", read_lines(path, skip = 1, n_max = 1)),
-    split = " +"
-  )))
-  nvar <- datadef[1]
-
-  # Read the column names from line 3 to nvar + 2.
-  # GSLIB allows spaces in names, remove these.
-  names <- gsub(" +", "", read_lines(path, skip = 2, n_max = nvar))
+  # Read the header.
+  header <- read_gslib_header(path)
 
   # Read in the data. GSLIB column types are always numeric.
   # `fread` is much better at reading this format than `readr::read_table2`,
@@ -33,8 +23,8 @@ read_gslib <- function(path) {
   # lots messy warnings.
   data <- fread(
     path,
-    col.names = names,
-    skip = 2 + nvar,
+    col.names = header$col_names,
+    skip = 2 + header$col_count,
     na.strings = c("", "-1.0e21", "-999.00000", "-999"),
     data.table = FALSE
     )
@@ -51,23 +41,32 @@ read_gslib <- function(path) {
 #' \code{write_gslib} writes a data frame to the GeoEase format used by GSLIB
 #' programes. GeoEase has a standard header with a title and number and names of
 #' the columns. The title can be supplied or is built automatically from meta-
-#' data in the data frame or the name of the data fram object. Only numeric
-#' columns are written to the system file and they are rounded. This version
-#' not support wrting of the grid-format GSLIB data file.
+#' data in the data frame or the name of the data frame object. Only numeric
+#' columns are written to the system file and they are rounded.
+#'
+#' If grid argument \code{griddim} is given a grid definition will be written to
+#' the output GeoEase file. If there is more than 1 realization in the grid data
+#' the the input data frame (\code{data}) must be sorted by realization and must
+#' have the same number of records for each realization.
 #'
 #' @param data Data frame to write to disk, only numeric columns are exported.
 #' @param path Path or connection to write to.
 #' @param round Integer scalar, number of digits to round data before export.
 #' @param title Character title to be appended to GeoEase file. If not supplied
 #'   it will be determined from \code{data} meta-data or it's name.
-#' @return \code{write_gslib} returns the input \code{data} invisibly.
+#' @param griddim Numeric vector of xyz grid dimensions. Length 2 for 2D.
+#' @param gridxyz Character vector of grid xyz coordinate columns.
+#' @param gridrealz Scalar integer number of realizations if grid file.
+#' @return \code{write_gslib} returns the input \code{data} invisibly. The
+#'   function side-effect is a GeoEase-format system file.
 #' @export
 #' @importFrom data.table fwrite
 #' @examples
 #' samples_na <- samples_2d
 #' samples_na[3:7, 5] <- NA
 #' write_gslib(samples_na, "samples-na.dat", round = 3, title = "sample data")
-write_gslib <- function(data, path, round = 4, title = NULL) {
+write_gslib <- function(
+  data, path, round=4, title=NULL, griddim=NULL, gridxyz=NULL, gridrealz=NULL) {
 
   # If no title is supplied try to make one.
   if(is.null(title)) {
@@ -80,12 +79,19 @@ write_gslib <- function(data, path, round = 4, title = NULL) {
   # GSLIB only supports numeric data types.
   # Also round numbers to prevent messy output.
   nums <- unlist(lapply(data, is.numeric))
-  data <- round(data[,nums], round)
+  data_gslib <- round(data[,nums], round)
 
   # Write GeoEase header.
-  ncols <- ncol(data)
+  ncols <- ncol(data_gslib)
   write(title, path)
-  write(ncols, path, append = TRUE)
+  # Grid definition if grid arguments are given.
+  if(!is.null(griddim)) {
+    grid_def <- create_gslib_griddef(data_gslib, griddim, gridxyz, gridrealz)
+    header <- paste(ncols, grid_def, collapse = " ")
+    write(header, path, append = TRUE)
+  } else {
+    write(ncols, path, append = TRUE)
+  }
   for(i in 1:ncols) {
       write(colnames(data[i]), path, append = TRUE)
   }
@@ -204,47 +210,120 @@ structure_types <- function() {
 #' @importFrom readr read_lines
 read_gslib_usgsim <- function(path, vars) {
 
-  # Get the grid definition..
-  datadef <- as.numeric(unlist(strsplit(
-    sub("^ +", "", read_lines(path, skip = 1, n_max = 1)),
-    split = " +"
-  )))
-  nsimvar <- datadef[1]
-  n_x <- datadef[2]
-  n_y <- datadef[3]
-  n_z <- datadef[4]
-  min_x <- datadef[5]
-  min_y <- datadef[6]
-  min_z <- datadef[7]
-  dim_x <- datadef[8]
-  dim_y <- datadef[9]
-  dim_z <- datadef[10]
-  n_realz <- datadef[11]
-  grid_x <- seq(min_x, min_x + (dim_x * (n_x - 1)), dim_x)
-  grid_y <- seq(min_y, min_y + (dim_y * (n_y - 1)), dim_y)
-  grid_z <- seq(min_z, min_z + (dim_z * (n_z - 1)), dim_z)
-  n_grid_points <- n_x * n_y * n_z
+  # Read the header.
+  header <- read_gslib_header(path)
+  grid_def <- header$grid_def
 
-  # Read in the data. GSLIB column types are always numeric.
-  # `fread` is much better at reading this format than `readr::read_table2`,
-  # `readr` tries to create a column for trailing spaces, it doesn't but
-  # throws lots messy warnings.
-  data <- fread(
-    path,
-    col.names = vars,
-    skip = 2 + nsimvar,
-    na.strings = c("", "-1.0e21", "-999.00000", "-999"),
-    data.table = FALSE
-  )
-  data[, "r"] <- rep(1:n_realz, each = n_grid_points)
-  data[, "x"] <- rep(grid_x, times = n_realz, each = 1)
-  data[, "y"] <- rep(grid_y, times = n_realz, each = n_x)
-  data[, "z"] <- rep(grid_z, times = n_realz, each = n_x * n_y)
+  # Read the data.
+  read_gslib(path)
+
+  # Create coordinates and realizations.
+  n_grid_points <- grid_def$n_x * grid_def$n_y * grid_def$n_z
+  grid_x <- seq(grid_def$min_x, grid_def$min_x + (grid_def$dim_x *
+      (grid_def$n_x - 1)), grid_def$dim_x)
+  grid_y <- seq(grid_def$min_y, grid_def$min_y + (grid_def$dim_y *
+      (grid_def$n_y - 1)), grid_def$dim_y)
+  grid_z <- seq(grid_def$min_z, grid_def$min_z + (grid_def$dim_z *
+      (grid_def$n_z - 1)), grid_def$dim_z)
+  data[, "r"] <- rep(1:grid_def$n_realz, each = n_grid_points)
+  data[, "x"] <- rep(grid_x, times = grid_def$realz, each = 1)
+  data[, "y"] <- rep(grid_y, times = grid_def$realz, each = grid_def$n_x)
+  data[, "z"] <- rep(grid_z, times = grid_def$realz, each = grid_def$n_x *
+      grid_def$n_y)
+  # Arrange columns.
   data <- data[, c("r", "x", "y", "z", vars)]
 
   # Read the title to be added as a comment to the output data.
   comment(data) <- as.character(read_lines(path, skip = 0, n_max = 1))
 
   return(data)
+
+}
+
+#' Create a GSLIB Grid Definition from a Grid Data Frame.
+#'
+#' @param data Data frame representing grid.
+#' @param dims Numeric vector of xyz grid node spacing. Length 2 for 2D.
+#' @param xyz Character vector of xyz coordinate column names. Length 2 for 2D.
+#' @param realz Number of realizations.
+#'
+#' @return Named numeric vector of grid definition.
+create_gslib_griddef <- function(data, dims=c(1, 1), xyz=c("x", "y"), realz=1) {
+
+  dim_x <- dims[1]
+  min_x <- min(data[,xyz[1]])
+  n_x <- round((max(data[,xyz[1]]) - min_x) / dim_x, 0)
+  dim_y <- dims[2]
+  min_y <- min(data[,xyz[2]])
+  n_y <- round((max(data[,xyz[2]]) - min_y) / dim_y, 0)
+
+  if(length(dim) == 3) {
+    dim_z <- dims[3]
+    min_z <- min(data[,xyz[3]])
+    n_z <- round((max(data[,xyz[3]]) - min_z) / dim_z, 0)
+  } else {
+    dim_z <- 1
+    min_z <- 0
+    n_z <- 1
+  }
+
+  griddef <- c(n_x=n_x, n_y=n_y, n_z=n_z, min_x=min_x, min_y=min_y, min_z=min_z,
+    dim_x=dim_x, dim_y=dim_y, dim_z=dim_z, realz=realz)
+
+  return(griddef)
+
+}
+
+#' Get Vector of Column Indices for a Data Frame.
+#'
+#' @param data Data frame
+#' @param vars Character vector of column names in \code{data}.
+#'
+#' @return Numeric vector of column indices.
+get_column_indices <- function(data, vars) {
+
+  col_i <- which(colnames(data) %in% vars)
+  return(col_i)
+
+}
+
+
+#' Get Header from GSLIB Simplified GeoEase File
+#'
+#' \code{read_gslib_header} Reads the header of a GSLIB simplified GeoEase format
+#' file. It returns information about the columns in the file and, if it is a
+#' grid file, it returns the grid definition.
+#'
+#' @param path Character string name of system file in GeoEase format.
+#'
+#' @return List containing the column definition and, if applicable, a grid
+#' definition.
+#' @importFrom readr read_lines
+read_gslib_header <- function(path){
+
+  # Read the header.
+  header <- as.numeric(unlist(strsplit(
+    sub("^ +", "", read_lines(path, skip = 1, n_max = 1)),
+    split = " +"
+  )))
+
+  # Create a column definition.
+  n_cols <- header[1]
+  names <- gsub(" +", "", read_lines(path, skip = 2, n_max = n_cols))
+
+  # Create a grid definition.
+  if(length(header) > 1) {
+    def <- c(
+      n_x=header[2], n_y=header[3], n_z=header[4],
+      min_x=header[5], min_y=header[6], min_z=header[7],
+      dim_x=header[8], dim_y=header[9], dim_z=header[10],
+      realz=header[11]
+    )
+    header <- list(col_count=n_cols, col_names=names, grid_def=def)
+  } else {
+    header <- list(col_count=n_cols, col_names=names)
+  }
+
+  return(header)
 
 }
