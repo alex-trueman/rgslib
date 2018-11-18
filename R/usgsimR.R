@@ -43,9 +43,10 @@
 #' @param altflag Scalar integer: option for primary variables if BU; or for
 #'   secondary variables if CK.
 #' @param cosim Scalar boolean: perform cosimulation of multiple variables.
-#' @param domgrid Data frame containing only x, y, and, optionally z coordinate
-#'   columns that define the domain grid. Output data will be restriceted to
-#'   these coorindate points. Coordinate columns must be the same as \code{xyz}.
+#' @param domgrid Data frame containing x, y, and, optionally z coordinate
+#'   columns that define the domain grid and a domain or zone field(s). Output
+#'   data will be contain  domain code for those coorindate points. Coordinate
+#'   columns must be the same as \code{xyz}.
 #' @importFrom magrittr %<>%
 #' @importFrom dplyr semi_join
 #' @return Data frame of simulation results.
@@ -217,11 +218,10 @@ usgsimR <- function(
     # Import the simulated data.
     sims <- read_gslib_usgsim(paste0(simout, ".out"), vars)
 
-    # Restrict to domain grid.
-    # Calculate mean of realizations.
+    # Assign domain code to the grid.
     if(!is.null(domgrid)) {
         sims %<>%
-            semi_join(domgrid, by = xyz)
+            left_join(domgrid, by = xyz)
     }
 
     return(sims)
