@@ -4,12 +4,15 @@
 \alias{read_gslib_usgsim}
 \title{Import \code{usgsim} regular output format and add coordinates.}
 \usage{
-read_gslib_usgsim(path, vars)
+read_gslib_usgsim(path, vars, grid = NULL)
 }
 \arguments{
 \item{path}{Path or connection to read from.}
 
 \item{vars}{Character vector of simulated column names.}
+
+\item{grid}{A named numeric vecotor grid definition. Only used if there
+is no definition in the GeoEase file.}
 }
 \value{
 A data frame containing realization number, cartesian coordinates,

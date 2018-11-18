@@ -71,9 +71,10 @@ secondary variables if CK.}
 
 \item{cosim}{Scalar boolean: perform cosimulation of multiple variables.}
 
-\item{domgrid}{Data frame containing only x, y, and, optionally z coordinate
-columns that define the domain grid. Output data will be restriceted to
-these coorindate points. Coordinate columns must be the same as \code{xyz}.}
+\item{domgrid}{Data frame containing x, y, and, optionally z coordinate
+columns that define the domain grid and a domain or zone field(s). Output
+data will be contain  domain code for those coorindate points. Coordinate
+columns must be the same as \code{xyz}.}
 }
 \value{
 Data frame of simulation results.
