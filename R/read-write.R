@@ -36,6 +36,7 @@ read_gslib <- function(path) {
 
 }
 
+
 #' Export a Data Frame to Simplified GeoEase Format Used by GSLIB.
 #'
 #' \code{write_gslib} writes a data frame to the GeoEase format used by GSLIB
@@ -70,10 +71,10 @@ write_gslib <- function(
 
   # If no title is supplied try to make one.
   if(is.null(title)) {
-      title <- comment(data)
-      if(is.null(title)) {
-          title <- deparse(substitute(data))
-      }
+    title <- comment(data)
+    if(is.null(title)) {
+      title <- deparse(substitute(data))
+    }
   }
 
   # GSLIB only supports numeric data types.
@@ -87,13 +88,13 @@ write_gslib <- function(
   # Grid definition if grid arguments are given.
   if(!is.null(griddim)) {
     grid_def <- create_gslib_griddef(data_gslib, griddim, gridxyz, gridrealz)
-    header <- paste(ncols, grid_def, collapse = " ")
+    header <- paste0(ncols, "  ", paste(grid_def, collapse = "  "))
     write(header, path, append = TRUE)
   } else {
     write(ncols, path, append = TRUE)
   }
   for(i in 1:ncols) {
-      write(colnames(data[i]), path, append = TRUE)
+    write(colnames(data[i]), path, append = TRUE)
   }
 
   # Write the data.
@@ -201,6 +202,8 @@ structure_types <- function() {
 #'
 #' @param path Path or connection to read from.
 #' @param vars Character vector of simulated column names.
+#' @param grid A named numeric vecotor grid definition. Only used if there
+#'   is no definition in the GeoEase file.
 #' @return A data frame containing realization number, cartesian coordinates,
 #'   and simulated data.
 #' @export
@@ -208,11 +211,16 @@ structure_types <- function() {
 #' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
 #' @importFrom readr read_lines
-read_gslib_usgsim <- function(path, vars) {
+read_gslib_usgsim <- function(path, vars, grid=NULL) {
 
   # Read the header.
   header <- read_gslib_header(path)
-  grid_def <- header$grid_def
+  # Build grid definition if none in file.
+  if(length(header) < 3 & !is.null(grid)) {
+    grid_def <- grid
+  } else {
+    grid_def <- header$grid_def
+  }
 
   # Read the data.
   data <- read_gslib(path)
@@ -259,7 +267,7 @@ create_gslib_griddef <- function(data, dims=c(1, 1), xyz=c("x", "y"), realz=1) {
   min_y <- min(data[,xyz[2]])
   n_y <- round((max(data[,xyz[2]]) - min_y) / dim_y, 0)
 
-  if(length(dim) == 3) {
+  if(length(xyz) == 3) {
     dim_z <- dims[3]
     min_z <- min(data[,xyz[3]])
     n_z <- round((max(data[,xyz[3]]) - min_z) / dim_z, 0)
@@ -288,6 +296,7 @@ get_column_indices <- function(data, vars) {
   return(col_i)
 
 }
+
 
 
 #' Get Header from GSLIB Simplified GeoEase File
