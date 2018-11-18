@@ -2,7 +2,7 @@
 #'
 #' \code{vl_lmcR} is an interface to the Fortran program \code{varfit_lmc}.
 #' It auotmaticaly models direct and cross variograms given experimental points
-#' and models fo the direc variograms.
+#' and models fo the direct variograms.
 #'
 #' @param nvars Scalar numeric: number of variables being modelled.
 #' @param corr0 Numeric vector: cross-variogram nugget effects.
