@@ -16,7 +16,7 @@
 #' @param dip Dip in degrees from horizontal, negative down.
 #'
 #' @return Numeric unit vector of length three.
-#'
+#' @export
 #' @examples
 #' unit_vector(90) # Aligned along x-axis.
 #' unit_vector(0) # Aligned along the y-axis.
@@ -41,8 +41,6 @@ unit_vector <- function(azm=0, dip=0) {
 #' @param vars Character vector of column names in \code{data}.
 #'
 #' @return Numeric vector of column indices.
-#' @examples
-#' get_column_incices(samples_2d, c("thk", "accum"))
 get_column_indices <- function(data, vars) {
     col_i <- which(colnames(data) %in% vars)
     return(col_i)
@@ -54,8 +52,6 @@ get_column_indices <- function(data, vars) {
 #' structure types.
 #'
 #' @return Data frame of structure types.
-#' @examples
-#' structure_types()
 structure_types <- function() {
     x <- data.frame(
         type = c(0, 1, 2, 3, 4),
