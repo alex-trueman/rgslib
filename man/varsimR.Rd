@@ -5,7 +5,7 @@
 \title{Calculated Variograms for Gridded Data}
 \usage{
 varsimR(data, vars, xyz = c("x", "y"), dims = c(1, 1), realz = 1,
-  standarize = FALSE, dirs = c(0, 90), nlags = 10, single = FALSE)
+  standardize = FALSE, dirs = c(0, 90), nlags = 10, single = FALSE)
 }
 \arguments{
 \item{data}{Data frame of gridded data.}
@@ -18,7 +18,7 @@ varsimR(data, vars, xyz = c("x", "y"), dims = c(1, 1), realz = 1,
 
 \item{realz}{Scalar integer number of realizations.}
 
-\item{standarize}{Scalar boolean: standardize variograms.}
+\item{standardize}{Scalar boolean: standardize variograms.}
 
 \item{dirs}{Numeric vecotr of azimuth rotations.}
 
