@@ -3,6 +3,7 @@
 export(addcoordR)
 export(declusR)
 export(read_gslib)
+export(read_gslib_grid_vario)
 export(read_gslib_mvario)
 export(read_gslib_usgsim)
 export(rgslib_example)
