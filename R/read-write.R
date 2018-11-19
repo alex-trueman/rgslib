@@ -36,7 +36,6 @@ read_gslib <- function(path) {
 
 }
 
-
 #' Export a Data Frame to Simplified GeoEase Format Used by GSLIB.
 #'
 #' \code{write_gslib} writes a data frame to the GeoEase format used by GSLIB
@@ -180,20 +179,6 @@ read_gslib_mvario <- function(path) {
 
 }
 
-#' Valid Variogram Model Structure Types
-#'
-#' Links GSLIB numeric structure types to \code{gstat} short alphanumeric
-#' structure types.
-#'
-#' @return Data frame of structure types.
-structure_types <- function() {
-  x <- data.frame(
-    type = c(0, 1, 2, 3, 4),
-    model = c("Nug", "Sph", "Exp", "Gau", "Hol")
-  )
-  return(x)
-}
-
 #' Import \code{usgsim} regular output format and add coordinates.
 #'
 #' \code{read_gslib_usgsim} imports the regular output format of
@@ -283,21 +268,6 @@ create_gslib_griddef <- function(data, dims=c(1, 1), xyz=c("x", "y"), realz=1) {
   return(griddef)
 
 }
-
-#' Get Vector of Column Indices for a Data Frame.
-#'
-#' @param data Data frame
-#' @param vars Character vector of column names in \code{data}.
-#'
-#' @return Numeric vector of column indices.
-get_column_indices <- function(data, vars) {
-
-  col_i <- which(colnames(data) %in% vars)
-  return(col_i)
-
-}
-
-
 
 #' Get Header from GSLIB Simplified GeoEase File
 #'
