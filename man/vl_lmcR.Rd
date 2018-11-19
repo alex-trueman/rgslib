@@ -38,5 +38,5 @@ and \code{corrs} contains the model cross-variogram sills for validation.
 \description{
 \code{vl_lmcR} is an interface to the Fortran program \code{varfit_lmc}.
 It auotmaticaly models direct and cross variograms given experimental points
-and models fo the direc variograms.
+and models fo the direct variograms.
 }
