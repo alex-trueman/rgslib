@@ -2,9 +2,7 @@
 % Please edit documentation in R/varsimR.R
 \name{varsimR}
 \alias{varsimR}
-\title{Only supports 2D rotations.
-Does not support lithology data file.
-Does not support indicator variograms.}
+\title{Calculated Variograms for Gridded Data}
 \usage{
 varsimR(data, vars, xyz = c("x", "y"), dims = c(1, 1), realz = 1,
   standarize = FALSE, dirs = c(0, 90), nlags = 10, single = FALSE)
@@ -28,6 +26,9 @@ varsimR(data, vars, xyz = c("x", "y"), dims = c(1, 1), realz = 1,
 
 \item{single}{Boolean: produce a single variogram rather than direct and
 cross variograms.}
+}
+\value{
+Data frame variograms.
 }
 \description{
 Only supports 2D rotations.

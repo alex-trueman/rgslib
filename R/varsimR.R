@@ -1,4 +1,6 @@
 
+#' Calculated Variograms for Gridded Data
+#'
 #' Only supports 2D rotations.
 #' Does not support lithology data file.
 #' Does not support indicator variograms.
@@ -13,8 +15,8 @@
 #' @param nlags Number of lags to calculate.
 #' @param single Boolean: produce a single variogram rather than direct and
 #'   cross variograms.
-#' @export
 #' @return Data frame variograms.
+#' @export
 varsimR <- function(
     data, vars, xyz=c("x", "y"), dims=c(1, 1), realz=1, standarize=FALSE,
     dirs=c(0, 90), nlags=10, single=FALSE
