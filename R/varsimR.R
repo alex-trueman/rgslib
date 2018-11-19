@@ -10,7 +10,7 @@
 #' @param xyz Character vecotr of coordinate column names.
 #' @param dims Numeric vector of grid node/cell dimensions.
 #' @param realz Scalar integer number of realizations.
-#' @param standarize Scalar boolean: standardize variograms.
+#' @param standardize Scalar boolean: standardize variograms.
 #' @param dirs Numeric vecotr of azimuth rotations.
 #' @param nlags Number of lags to calculate.
 #' @param single Boolean: produce a single variogram rather than direct and
@@ -18,7 +18,7 @@
 #' @return Data frame variograms.
 #' @export
 varsimR <- function(
-    data, vars, xyz=c("x", "y"), dims=c(1, 1), realz=1, standarize=FALSE,
+    data, vars, xyz=c("x", "y"), dims=c(1, 1), realz=1, standardize=FALSE,
     dirs=c(0, 90), nlags=10, single=FALSE
 ) {
 
@@ -35,17 +35,16 @@ varsimR <- function(
                 factorial(nvars - 2))) + nvars
     }
 
-
     # Make parameter file.
     parstring <- c(
         "START OF PARAMETERS:  ",
-        "lithology.dat  ",
+        "xxlithology.xx  ",
         "0  0  ",
-        "xxdata.dat  ",
-        paste0(nvars, "  ", vars_i, "  "),
+        "xxdata.xx  ",
+        paste0(nvars, "  ", paste(vars_i, collapse = "  "), "  "),
         "-1.0e21  1.0e21  ",
-        "xxvarsims_reals.out  ",
-        "xxvarsim_avg.out  ",
+        "xxvarsims_reals.xx  ",
+        "xxvarsim_avg.xx  ",
         paste(grid_def[c("n_x", "min_x", "dim_x")], collapse = "  "),
         paste(grid_def[c("n_y", "min_y", "dim_y")], collapse = "  "),
         paste(grid_def[c("n_z", "min_z", "dim_z")], collapse = "  "),
@@ -62,7 +61,10 @@ varsimR <- function(
     # More parameters.
     parstring <- c(
         parstring,
-        paste0(nvarios, "  ")
+        paste0(
+            as.numeric(standardize), "  \n",
+            nvarios, "  "
+        )
     )
     # Variogram setup.
     if(single & nvars == 2) {
@@ -97,8 +99,44 @@ varsimR <- function(
     }
 
     # Write parameters to a file.
-    file_conn <- file("varsim.par")
+    file_conn <- file("xxvarsim.xx")
     writeLines(parstring, file_conn)
     close(file_conn)
 
+    # Write grid data to GeoEase file.
+    write_gslib(data, "xxdata.xx", griddim=dims, gridxyz=xyz, gridrealz=realz)
+
+    # Run the program.
+    shell("varsim xxvarsim.xx")
+
+    # Import the variogram.
+    vario <- list(
+        realz = read_gslib_grid_vario("xxvarsims_reals.xx"),
+        avg = read_gslib_grid_vario("xxvarsim_avg.xx")
+    )
+
+    return(vario)
+
+}
+
+#' Import GSLIB-Format Gridded Experimental Data to a Data Frame.
+#'
+#' \code{read_gslib_grid_vario} imports from GSLIB gridded experimental
+#' variogram format producing a data frame of class 'gstatVariogram'.
+#'
+#' @param path Path or connection to read from.
+#' @return A data frame.
+#' @export
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+read_gslib_grid_vario <- function(path) {
+    vario_data <- read_gslib(path) %>%
+        select(
+            np = .data$NumberofPairs, dist = .data$LagDistance,
+            gamma = .data$VariogramValue, dir.hor = .data$CalculationAzimuth,
+            dir.ver = .data$CalculationDip, r = .data$VariogramIndex,
+            type = .data$VariogramType
+        )
+    class(vario_data) <- c("gstatVariogram", "data.frame")
+    return(vario_data)
 }
