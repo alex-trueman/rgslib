@@ -89,21 +89,18 @@ varmapR <- function(
   # Run the unscore program.
   shell("varmap varmap.par")
 
-  # Add coordinates to the output.
-  addcoordR(
-    "varmap-out.dat",
-    realization = 1,
-    xdef = c(nlag[1] * 2 + 1, 0, 1),
-    ydef = c(nlag[2] * 2 + 1, 0, 1),
-    zdef = c(nlag[3] * 2 + 1, 0, 1),
-    dec = c(1, 1, -1))
-  # Read the output.
-  varmap_data <- read_gslib("addcoord-out.dat")
+  # Read in variogram map and add coordinates.
+  varmap_data <- read_gslib("varmap-out.dat")
+  header <- read_gslib_header("varmap-out.dat")
+  grid_def <- header$grid_def
+  varmap_data <- add_coords(varmap_data, grid_def)
+
+  # Clean up missing values.
   varmap_data <- varmap_data[!is.na(varmap_data$variogram),]
 
   # Clean up.
   if(!debug) {
-    shell("del varmap.par varmap-in.dat varmap-out.dat addcoord-out.dat")
+    shell("del varmap.par varmap-in.dat varmap-out.dat")
   }
 
   return(varmap_data)
