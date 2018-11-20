@@ -188,7 +188,9 @@ read_gslib_mvario <- function(path) {
 #' @param path Path or connection to read from.
 #' @param vars Character vector of simulated column names.
 #' @param grid A named numeric vecotor grid definition. Only used if there
-#'   is no definition in the GeoEase file.
+#'   is no definition in the GeoEase file. Standard grid definition, has
+#'   elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y,
+#'   dim_z, realz.
 #' @return A data frame containing realization number, cartesian coordinates,
 #'   and simulated data.
 #' @export
@@ -212,21 +214,7 @@ read_gslib_usgsim <- function(path, vars, grid=NULL) {
   colnames(data) <- vars
 
   # Create coordinates and realizations.
-  n_grid_points <- grid_def["n_x"] * grid_def["n_y"] * grid_def["n_z"]
-  grid_x <- seq(grid_def["min_x"], grid_def["min_x"] + (grid_def["dim_x"] *
-      (grid_def["n_x"] - 1)), grid_def["dim_x"])
-  grid_y <- seq(grid_def["min_y"], grid_def["min_y"] + (grid_def["dim_y"] *
-      (grid_def["n_y"] - 1)), grid_def["dim_y"])
-  grid_z <- seq(grid_def["min_z"], grid_def["min_z"] + (grid_def["dim_z"] *
-      (grid_def["n_z"] - 1)), grid_def["dim_z"])
-  data[, "r"] <- rep(1:grid_def["realz"], each = n_grid_points)
-  data[, "x"] <- rep(grid_x, times = grid_def["realz"], each = 1)
-  data[, "y"] <- rep(grid_y, times = grid_def["realz"], each = grid_def["n_x"])
-  data[, "z"] <- rep(grid_z, times = grid_def["realz"], each = grid_def["n_x"] *
-      grid_def["n_y"])
-
-  # Arrange columns.
-  data <- data[, c("r", "x", "y", "z", vars)]
+  data <- add_coords(data, grid_def)
 
   # Read the title to be added as a comment to the output data.
   comment(data) <- as.character(read_lines(path, skip = 0, n_max = 1))
