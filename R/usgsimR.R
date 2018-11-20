@@ -227,27 +227,3 @@ usgsimR <- function(
     return(sims)
 }
 
-
-
-#' Create GSLIB Parameter File Variogram Model String.
-#'
-#' @param mvario A data frame of class variogramModel (`gstat` package).
-#' @return A character string suitable for use in GSLIB parameter files.
-mvario_parstring <- function(mvario){
-    sill <- sum(mvario$psill)
-    c0 <- mvario[mvario$model == "Nug",]$psill
-    if(is.na(c0)) {c0 <- 0}
-    xc0 <- mvario[mvario$model != "Nug",]
-    nst <- nrow(xc0)
-    parstring <- paste0(nst, "  ", c0, "  ", sill, "  ")
-    for(st in 1:nst){
-        xc0st <- xc0[st,]
-        parstring <- c(
-            parstring,
-            paste(xc0st[c(9, 2, 4, 5, 6)], collapse = "  "),
-            paste0(xc0st[3], "  ", xc0st[3] * xc0st[7], "  ",
-                xc0st[3] * xc0st[7], "  ")
-        )
-    }
-    return(parstring)
-}
