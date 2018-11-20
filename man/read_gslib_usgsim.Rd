@@ -12,7 +12,9 @@ read_gslib_usgsim(path, vars, grid = NULL)
 \item{vars}{Character vector of simulated column names.}
 
 \item{grid}{A named numeric vecotor grid definition. Only used if there
-is no definition in the GeoEase file.}
+is no definition in the GeoEase file. Standard grid definition, has
+elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y,
+dim_z, realz.}
 }
 \value{
 A data frame containing realization number, cartesian coordinates,
