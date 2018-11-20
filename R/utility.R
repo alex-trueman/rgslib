@@ -59,3 +59,66 @@ structure_types <- function() {
     )
     return(x)
 }
+
+
+#' Create GSLIB Parameter File Variogram Model String.
+#'
+#' @param mvario A data frame of class variogramModel (`gstat` package).
+#' @return A character string suitable for use in GSLIB parameter files.
+mvario_parstring <- function(mvario){
+    sill <- sum(mvario$psill)
+    c0 <- mvario[mvario$model == "Nug",]$psill
+    if(is.na(c0)) {c0 <- 0}
+    xc0 <- mvario[mvario$model != "Nug",]
+    nst <- nrow(xc0)
+    parstring <- paste0(nst, "  ", c0, "  ", sill, "  ")
+    for(st in 1:nst){
+        xc0st <- xc0[st,]
+        parstring <- c(
+            parstring,
+            paste(xc0st[c(9, 2, 4, 5, 6)], collapse = "  "),
+            paste0(xc0st[3], "  ", xc0st[3] * xc0st[7], "  ",
+                xc0st[3] * xc0st[7], "  ")
+        )
+    }
+    return(parstring)
+}
+
+#' Create Coordinates for GSLIB-style Grid file.
+#'
+#' @param data Data frame with grid arrangements but no coordiates. Imported
+#'   from a GeoEase system file with function like \code{read_gslib}.
+#' @param grid_def Standard grid definition, which is a named numeric vecotor
+#'   with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
+#'   dim_y, dim_z, realz.
+#'
+#' @return Data frame same as input but with fields: r, x, y, z added.
+add_coords <- function(data, grid_def) {
+
+    # Get names of columns already in `data`.
+    vars <- colnames(data)
+
+    n_grid_points <- grid_def["n_x"] * grid_def["n_y"] * grid_def["n_z"]
+
+    # All coordinates.
+    grid_x <- seq(grid_def["min_x"], grid_def["min_x"] + (grid_def["dim_x"] *
+            (grid_def["n_x"] - 1)), grid_def["dim_x"])
+    grid_y <- seq(grid_def["min_y"], grid_def["min_y"] + (grid_def["dim_y"] *
+            (grid_def["n_y"] - 1)), grid_def["dim_y"])
+    grid_z <- seq(grid_def["min_z"], grid_def["min_z"] + (grid_def["dim_z"] *
+            (grid_def["n_z"] - 1)), grid_def["dim_z"])
+
+    # Calculate grids and realizations.
+    data[, "r"] <- rep(1:grid_def["realz"], each = n_grid_points)
+    data[, "x"] <- rep(grid_x, times = grid_def["realz"], each = 1)
+    data[, "y"] <- rep(grid_y, times = grid_def["realz"],
+        each = grid_def["n_x"])
+    data[, "z"] <- rep(grid_z, times = grid_def["realz"],
+        each = grid_def["n_x"] * grid_def["n_y"])
+
+    # Arrange columns.
+    data <- data[, c("r", "x", "y", "z", vars)]
+
+    return(data)
+
+}
