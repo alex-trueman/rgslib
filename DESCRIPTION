@@ -19,6 +19,7 @@ Imports:
     purrr (>= 0.2),
     stats,
     rlang (>= 0.3),
+    tibble (>= 1.4),
     tidyselect (>= 0.2),
     utils
 Suggests: 
