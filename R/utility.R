@@ -122,3 +122,51 @@ add_coords <- function(data, grid_def) {
     return(data)
 
 }
+
+#' Build a Variogram Calculation Parameter List from Stored Parameters
+#'
+#' @param data Data frame of stored parameters (see example for strict
+#'   structure of the data frame).
+#' @param domain Scalar numeric or character (matched to type in \code{data})
+#'   domain, category, or zone code.
+#' @param var Scalar character variable name for variogram.
+#' @param ndims Scalar numeric 1--3: number of variogram dimensions (axes) with
+#'   1 being major; 2 semi-major; and 3 minor.
+#'
+#' @return A list of axis variogram parameters suitable for input into variogram
+#'   calculation function \link{varcalcR}.
+#' @export
+#'
+#' @examples
+#' vario_calc <- tibble::tribble(
+#' ~domain, ~vars, ~axis, ~azm, ~azmtol, ~bndhorz, ~dip, ~diptol, ~bndvert,
+#' ~tilt, ~nlags, ~dlag, ~lagtol,
+#' 38, "NS_thk", 1, 90, 45, 1.0e21, 0, 90, 1.0e21, 0, 15, 10, 0.5,
+#' 38, "NS_thk", 2, 180, 45, 1.0e21, 0, 90, 1.0e21, 0, 10, 10, 0.5,
+#' 38, "NS_accum", 1, 90, 45, 1.0e21, 0, 90, 1.0e21, 0, 15, 10, 0.5,
+#' 38, "NS_accum", 2, 180, 45, 1.0e21, 0, 90, 1.0e21, 0, 10, 10, 0.5,
+#' 38, "NS_thkaccum", 1, 90, 45, 1.0e21, 0, 90, 1.0e21, 0, 15, 10, 0.5,
+#' 38, "NS_thkaccum", 2, 180, 45, 1.0e21, 0, 90, 1.0e21, 0, 10, 10, 0.5
+#' )
+#' build_vario_par_list(vario_calc, 38, "NS_accum", 2)
+build_vario_par_list <- function(data, domain, var, ndims) {
+    pars <- data[data$domain == domain & data$vars == var,]
+    calcpars <- list()
+    for(ax in 1:ndims) {
+        pax <- pars[pars$axis == ax,]
+        axpars <- c(
+            azm = pax$azm,  azmtol = pax$azmtol, bndhorz = pax$bndhorz,
+            dip = pax$dip, diptol = pax$diptol, bndvert = pax$bndvert,
+            tilt = pax$tilt, nlags = pax$nlags, dlag = pax$dlag,
+            lagtol = pax$lagtol
+        )
+        if(ax == 1) {
+            calcpars[["major"]] <- axpars
+        } else if(ax == 2) {
+            calcpars[["semi_major"]] <- axpars
+        } else {
+            calcpars[["minor"]] <- axpars
+        }
+    }
+    return(calcpars)
+}
