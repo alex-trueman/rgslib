@@ -153,20 +153,29 @@ build_vario_par_list <- function(data, domain, var, ndims) {
     pars <- data[data$domain == domain & data$vars == var,]
     calcpars <- list()
     for(ax in 1:ndims) {
-        pax <- pars[pars$axis == ax,]
-        axpars <- c(
-            azm = pax$azm,  azmtol = pax$azmtol, bndhorz = pax$bndhorz,
-            dip = pax$dip, diptol = pax$diptol, bndvert = pax$bndvert,
-            tilt = pax$tilt, nlags = pax$nlags, dlag = pax$dlag,
-            lagtol = pax$lagtol
-        )
+        pax <- unlist(pars[pars$axis == ax,])
         if(ax == 1) {
-            calcpars[["major"]] <- axpars
+            calcpars[["major"]] <- pax
         } else if(ax == 2) {
-            calcpars[["semi_major"]] <- axpars
+            calcpars[["semi_major"]] <- pax
         } else {
-            calcpars[["minor"]] <- axpars
+            calcpars[["minor"]] <- pax
         }
     }
     return(calcpars)
+}
+
+
+#' Build a Grid Defintion from Stored Parameters
+#'
+#' @param data Data frame of stored parameters with specific numeric columns:
+#'  domain, nx, ny, nz, min_x, min_y, min_z, dim_x, dim_y, dim_z
+#' @param domain Scalar numeric or character (matched to domain in \code{data})
+#'   domain, category, or zone code.
+#'
+#' @return A named numeric vector defining a grid.
+#' @export
+build_grid_def <- function(data, domain) {
+    pars <- unlist(data[data$domain == domain,])
+    return(pars)
 }
