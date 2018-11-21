@@ -19,9 +19,8 @@
 #' @param xyz Character vector of coordinate column names.
 #' @param n_realz Scalar integer number of simulation realizations.
 #' @param seed Scalar integer seed for renadom number generation.
-#' @param xdef Numeric vector with x-axis grid definition: number, origin, size.
-#' @param ydef Numeric vector with y-axis grid definition: number, origin, size.
-#' @param zdef Numeric vector with z-axis grid definition: number, origin, size.
+#' @param grid_def Named numeric vector with x, y, and z-axis grid definition:
+#'   n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y, dim_z
 #' @param simout Name of GeoEase grid file to contain output simulations.
 #' @param imputeout Name of file to contain imputed data in heterotopic case.
 #' @param debuglevel Scalar integer either 0 (none) or 1, 2, or 3 for increasing
@@ -53,11 +52,12 @@
 #' @export
 usgsimR <- function(
     data, mvario, vars, corr, xyz=c("x", "y"), n_realz=1, seed=60221409,
-    xdef=c(50, 0.5, 1.0), ydef=c(50, 0.5, 1.0),
-    zdef=c(50, 0.5, 1.0), simout='sgsim', imputeout='impute',
-    debuglevel=0, n_prev=12, srchdist=c(10, 10, 10), srchang=c(0, 0, 0),
-    sortmethod=0, covarsort=c(1, 1, 1), clip=TRUE, assign=1, trans=TRUE,
-    nquant=200, krigmethod=2, altflag=0, cosim=TRUE, domgrid=NULL
+    grid_def=c(n_x=50, n_y=50, n_z=1, min_x=0.5, min_y=0.5, min_z=0.5, dim_x=1,
+        dim_y=1, dim_z=1),
+    simout='sgsim', imputeout='impute', debuglevel=0, n_prev=12,
+    srchdist=c(10, 10, 10), srchang=c(0, 0, 0), sortmethod=0,
+    covarsort=c(1, 1, 1), clip=TRUE, assign=1, trans=TRUE, nquant=200,
+    krigmethod=2, altflag=0, cosim=TRUE, domgrid=NULL
 ){
 
     # Arguments are hard-coded for now but some support for future integration.
@@ -105,9 +105,9 @@ usgsimR <- function(
         nvars, "  \n",
         "0  \n",
         seed, "  \n",
-        xdef[1], "  ", xdef[2], "  ", xdef[3], "  \n",
-        ydef[1], "  ", ydef[2], "  ", ydef[3], "  \n",
-        zdef[1], "  ", zdef[2], "  ", zdef[3], "  \n",
+        grid_def["n_x"], " ", grid_def["min_x"], " ", grid_def["dim_x"], " \n",
+        grid_def["n_y"], " ", grid_def["min_y"], " ", grid_def["dim_y"], " \n",
+        grid_def["n_z"], " ", grid_def["min_z"], " ", grid_def["dim_z"], " \n",
         simout, ".out  \n",
         "0  \n",
         imputeout, ".out  \n",

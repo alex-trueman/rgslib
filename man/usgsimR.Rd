@@ -5,12 +5,13 @@
 \title{Simulation Using \code{usgsim} Fortran Program from CCG.}
 \usage{
 usgsimR(data, mvario, vars, corr, xyz = c("x", "y"), n_realz = 1,
-  seed = 60221409, xdef = c(50, 0.5, 1), ydef = c(50, 0.5, 1),
-  zdef = c(50, 0.5, 1), simout = "sgsim", imputeout = "impute",
-  debuglevel = 0, n_prev = 12, srchdist = c(10, 10, 10),
-  srchang = c(0, 0, 0), sortmethod = 0, covarsort = c(1, 1, 1),
-  clip = TRUE, assign = 1, trans = TRUE, nquant = 200,
-  krigmethod = 2, altflag = 0, cosim = TRUE, domgrid = NULL)
+  seed = 60221409, grid_def = c(n_x = 50, n_y = 50, n_z = 1, min_x =
+  0.5, min_y = 0.5, min_z = 0.5, dim_x = 1, dim_y = 1, dim_z = 1),
+  simout = "sgsim", imputeout = "impute", debuglevel = 0,
+  n_prev = 12, srchdist = c(10, 10, 10), srchang = c(0, 0, 0),
+  sortmethod = 0, covarsort = c(1, 1, 1), clip = TRUE, assign = 1,
+  trans = TRUE, nquant = 200, krigmethod = 2, altflag = 0,
+  cosim = TRUE, domgrid = NULL)
 }
 \arguments{
 \item{data}{Data frame containing coordinates and variables to condition the
@@ -29,11 +30,8 @@ class "variogramModel" or "variogramModelList".}
 
 \item{seed}{Scalar integer seed for renadom number generation.}
 
-\item{xdef}{Numeric vector with x-axis grid definition: number, origin, size.}
-
-\item{ydef}{Numeric vector with y-axis grid definition: number, origin, size.}
-
-\item{zdef}{Numeric vector with z-axis grid definition: number, origin, size.}
+\item{grid_def}{Named numeric vector with x, y, and z-axis grid definition:
+n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y, dim_z}
 
 \item{simout}{Name of GeoEase grid file to contain output simulations.}
 
