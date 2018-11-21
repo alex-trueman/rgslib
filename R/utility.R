@@ -151,6 +151,7 @@ add_coords <- function(data, grid_def) {
 #' build_vario_par_list(vario_calc, 38, "NS_accum", 2)
 build_vario_par_list <- function(data, domain, var, ndims) {
     pars <- data[data$domain == domain & data$vars == var,]
+    pars <- subset(pars, select = -c(domain, vars))
     calcpars <- list()
     for(ax in 1:ndims) {
         pax <- unlist(pars[pars$axis == ax,])
