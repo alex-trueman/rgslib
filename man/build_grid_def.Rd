@@ -8,7 +8,7 @@ build_grid_def(data, domain)
 }
 \arguments{
 \item{data}{Data frame of stored parameters with specific numeric columns:
-domain, nx, ny, nz, min_x, min_y, min_z, dim_x, dim_y, dim_z}
+domain, nx, ny, nz, min_x, min_y, min_z, dim_x, dim_y, dim_z, realz}
 
 \item{domain}{Scalar numeric or character (matched to domain in \code{data})
 domain, category, or zone code.}
