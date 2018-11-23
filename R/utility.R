@@ -88,7 +88,7 @@ mvario_parstring <- function(mvario){
 #'
 #' @param data Data frame with grid arrangements but no coordiates. Imported
 #'   from a GeoEase system file with function like \code{read_gslib}.
-#' @param grid_def Standard grid definition, which is a named numeric vecotor
+#' @param grid_def Standard grid definition, which is a named numeric vectoor
 #'   with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
 #'   dim_y, dim_z, realz.
 #'
@@ -185,7 +185,7 @@ build_grid_def <- function(data, domain) {
 
 #' Populate a Data Fram Grid Representation Using a Grid Definition
 #'
-#' @param grid_def Standard grid definition, which is a named numeric vecotor
+#' @param grid_def Standard grid definition, which is a named numeric vector
 #'   with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
 #'   dim_y, dim_z, realz.
 #'
@@ -229,7 +229,7 @@ create_grid <- function(grid_def) {
 #' Extract Regulalarly Spaced Samples from a Grid
 #'
 #' @param grid Data fram input grid.
-#' @param sample_def Standard grid definition, which is a named numeric vecotor
+#' @param sample_def Standard grid definition, which is a named numeric vector
 #'   with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
 #'   dim_y, dim_z, realz. Used to define regular sample pattern.
 #' @param xyz Coordinates in \code{grid}.
