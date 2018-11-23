@@ -13,18 +13,21 @@
 #'   \item Input grid is required with a key value to define nodes to estimate.
 #' }
 #'
-#' @param grid Data frame of output grid data. The first three columns are the
-#'   coordinate columns as specified in \code{xyz}. The z-column must be present
-#'   even if only x and y provided in \code{xyz} an can be set at a consatant
-#'   such as 1. The fourth column contains an indicator of the the nodes to
-#'   estimate as specified in \code{keyval}.
+#' @param grid_def Standard grid definition, which is a named numeric vector
+#'   with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
+#'   dim_y, dim_z, realz (realz is not used). This will be the grid that values
+#'   are estimated into.
 #' @param samples Data frame of sample data.
 #' @param vars Character vector (length 1--2) of variables in \code{samples} to
 #'   be estimated. First is primary, second is secondary.
-#' @param griddims Numeric vector of xyz grid node spacing. Length 2 for 2D.
 #' @param bhid Scalar character name of hole id column in \code{samples}. Only
 #'   needed if \code{ndhmax} is > 0.
 #' @param xyz Charcater vector of coordinate column names in \code{samples}.
+#' @param keygrid A data frame grid with columns x, y, and z and a fourth
+#'   column containing a flag for nodes to be estimated (flag value defined in
+#'   argument \code{keyvalue}). This grid must have the same definition as that
+#'   defined in argument \code{grid_def}. The full extend of this grid
+#'   definition must be populated.
 #' @param keyval Scalar integer key value in \code{keygrid} that indicates nodes
 #'   to be estiimated. Must be in column 4 after the three coordinate columns.
 #' @param n_dataspac Scalar integer number fo drillhole neighbours for
@@ -55,24 +58,30 @@
 #'
 #' @return Data frame grid with estimated variable.
 #' @export
-kt3dnR <- function(grid, samples, vars, griddims=c(1, 1), bhid=NULL,
-    xyz=c("x", "y"), keyval=0, n_dataspac=4, l_dataspac=6, idbg=0,
-    ndis=c(3, 3, 1), minmax=c(16, 30), noct=2, ndhmax=0, srchdist=c(10, 10, 10),
-    srchang=c(0, 0, 0), ktype=1, skmean=0, corr=0, zvar=0, mvario=NULL,
-    idw=TRUE, debug=FALSE
+kt3dnR <- function(grid_def, samples, vars, bhid=NULL,
+    xyz=c("x", "y", "z"), keygrid=NULL, keyval=0, n_dataspac=4, l_dataspac=6,
+    idbg=0, ndis=c(3, 3, 1), minmax=c(16, 30), noct=2, ndhmax=0,
+    srchdist=c(10, 10, 10),srchang=c(0, 0, 0), ktype=1, skmean=0, corr=0,
+    zvar=0, mvario=NULL, idw=TRUE, debug=FALSE
     ) {
 
     # Make a GSLIB sample data file.
     samp_gslib <- samples[,c(bhid, xyz, vars)]
     write_gslib(samp_gslib, "xxsamples.xx")
 
-    # Make a GSLIB grid file.
-    write_gslib(grid, "xxkeyout.xx")
-    # Create a grid definition for the paramter file.
-    grid_def <- create_gslib_griddef(grid, dims=griddims, xyz=xyz)
+    # Make a GSLIB grid file from the keygrid.
+    if(!is.null(keygrid)) {write_gslib(keygrid, "xxkeyout.xx")}
 
     # Get column indices.
-    vars_i <- paste(get_column_indices(samp_gslib, vars), collapse = "  ")
+    if(length(vars) == 2) {
+        vars_i <- paste(get_column_indices(samp_gslib, vars), collapse = "  ")
+    } else if(length(vars) == 1) {
+        vars_i <- paste(get_column_indices(samp_gslib, vars), 0,
+            collapse = "  ")
+    } else {
+        # Vector of variables must be length 1 or 2.
+        return(FALSE)
+    }
     if(length(xyz) == 3) {
         # 3D data with z-coordinate.
         xyz_i <- paste(get_column_indices(samp_gslib, xyz), collapse = "  ")
@@ -95,11 +104,11 @@ kt3dnR <- function(grid, samples, vars, griddims=c(1, 1), bhid=NULL,
         "START OF PARAMETERS:  \n",
         "xxsamples.xx  \n",
         bhid_i, "  ", xyz_i, "  ",vars_i, "  \n",
-        "-998.0  1.ee21  \n",
+        "-998.0  1.0e21  \n",
         "0  \n",
         "xxvk.dat  \n",
         "0  0  0  0  0  \n",
-        "xdataspacing.sum  \n",
+        "xxdataspacing.xx  \n",
         n_dataspac, "  ", l_dataspac, "  \n",
         idbg, " 100  0  \n",
         "xxdebug.xx  \n",
