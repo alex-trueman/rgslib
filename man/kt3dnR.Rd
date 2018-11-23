@@ -4,31 +4,34 @@
 \alias{kt3dnR}
 \title{Interface to \code{kt3dn} 3D Kriging Program.}
 \usage{
-kt3dnR(grid, samples, vars, griddims = c(1, 1), bhid = NULL,
-  xyz = c("x", "y"), keyval = 0, n_dataspac = 4, l_dataspac = 6,
+kt3dnR(grid_def, samples, vars, bhid = NULL, xyz = c("x", "y", "z"),
+  keygrid = NULL, keyval = 0, n_dataspac = 4, l_dataspac = 6,
   idbg = 0, ndis = c(3, 3, 1), minmax = c(16, 30), noct = 2,
   ndhmax = 0, srchdist = c(10, 10, 10), srchang = c(0, 0, 0),
   ktype = 1, skmean = 0, corr = 0, zvar = 0, mvario = NULL,
   idw = TRUE, debug = FALSE)
 }
 \arguments{
-\item{grid}{Data frame of output grid data. The first three columns are the
-coordinate columns as specified in \code{xyz}. The z-column must be present
-even if only x and y provided in \code{xyz} an can be set at a consatant
-such as 1. The fourth column contains an indicator of the the nodes to
-estimate as specified in \code{keyval}.}
+\item{grid_def}{Standard grid definition, which is a named numeric vector
+with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
+dim_y, dim_z, realz (realz is not used). This will be the grid that values
+are estimated into.}
 
 \item{samples}{Data frame of sample data.}
 
 \item{vars}{Character vector (length 1--2) of variables in \code{samples} to
 be estimated. First is primary, second is secondary.}
 
-\item{griddims}{Numeric vector of xyz grid node spacing. Length 2 for 2D.}
-
 \item{bhid}{Scalar character name of hole id column in \code{samples}. Only
 needed if \code{ndhmax} is > 0.}
 
 \item{xyz}{Charcater vector of coordinate column names in \code{samples}.}
+
+\item{keygrid}{A data frame grid with columns x, y, and z and a fourth
+column containing a flag for nodes to be estimated (flag value defined in
+argument \code{keyvalue}). This grid must have the same definition as that
+defined in argument \code{grid_def}. The full extend of this grid
+definition must be populated.}
 
 \item{keyval}{Scalar integer key value in \code{keygrid} that indicates nodes
 to be estiimated. Must be in column 4 after the three coordinate columns.}
