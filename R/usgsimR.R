@@ -20,7 +20,7 @@
 #' @param n_realz Scalar integer number of simulation realizations.
 #' @param seed Scalar integer seed for renadom number generation.
 #' @param grid_def Named numeric vector with x, y, and z-axis grid definition:
-#'   n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y, dim_z
+#'   n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y, dim_z, realz.
 #' @param simout Name of GeoEase grid file to contain output simulations.
 #' @param imputeout Name of file to contain imputed data in heterotopic case.
 #' @param debuglevel Scalar integer either 0 (none) or 1, 2, or 3 for increasing

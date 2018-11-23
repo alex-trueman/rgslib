@@ -31,7 +31,7 @@ class "variogramModel" or "variogramModelList".}
 \item{seed}{Scalar integer seed for renadom number generation.}
 
 \item{grid_def}{Named numeric vector with x, y, and z-axis grid definition:
-n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y, dim_z}
+n_x, n_y, n_z, min_x, min_y, min_z, dim_x, dim_y, dim_z, realz.}
 
 \item{simout}{Name of GeoEase grid file to contain output simulations.}
 
