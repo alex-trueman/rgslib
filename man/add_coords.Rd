@@ -10,7 +10,7 @@ add_coords(data, grid_def)
 \item{data}{Data frame with grid arrangements but no coordiates. Imported
 from a GeoEase system file with function like \code{read_gslib}.}
 
-\item{grid_def}{Standard grid definition, which is a named numeric vecotor
+\item{grid_def}{Standard grid definition, which is a named numeric vectoor
 with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
 dim_y, dim_z, realz.}
 }

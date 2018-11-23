@@ -7,7 +7,7 @@
 create_grid(grid_def)
 }
 \arguments{
-\item{grid_def}{Standard grid definition, which is a named numeric vecotor
+\item{grid_def}{Standard grid definition, which is a named numeric vector
 with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
 dim_y, dim_z, realz.}
 }

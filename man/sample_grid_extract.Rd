@@ -9,7 +9,7 @@ sample_grid_extract(grid, sample_def, xyz = c("x", "y"))
 \arguments{
 \item{grid}{Data fram input grid.}
 
-\item{sample_def}{Standard grid definition, which is a named numeric vecotor
+\item{sample_def}{Standard grid definition, which is a named numeric vector
 with elements (in order): n_x, n_y, n_z, min_x, min_y, min_z, dim_x,
 dim_y, dim_z, realz. Used to define regular sample pattern.}
 
